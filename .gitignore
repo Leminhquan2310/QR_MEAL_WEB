@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+# Resources (chừa lại)
+src/main/resources/db.properties
+src/main/resources/config.properties
