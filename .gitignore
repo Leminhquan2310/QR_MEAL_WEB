@@ -37,6 +37,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-# Resources (chừa lại)
+# Ignore sensitive resource files
 src/main/resources/db.properties
 src/main/resources/config.properties

@@ -81,7 +81,7 @@ public class EmployeeServlet extends HttpServlet {
         Employee employee = employeeDAO.selectById(id);
         IRoleDAO roleDAO = new RoleDAOImplement();
         List<Role> roles = roleDAO.selectAllRole();
-        request.setAttribute("pageTitle", "Sủa thông tin");
+        request.setAttribute("pageTitle", "Sửa thông tin nhân viên");
         request.setAttribute("pageContent", "../employee/update.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
         request.setAttribute("pageJs", "/resources/js/employee.js");

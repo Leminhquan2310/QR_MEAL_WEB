@@ -16,4 +16,5 @@ public interface IEmployeeDAO {
     boolean deleteEmp(int id);
 
     Employee checkLogin(String phone, String password);
+
 }

@@ -1,0 +1,32 @@
+/* Thu nhỏ modal vừa với emoji picker */
+.custom-emoji-dialog {
+    max-width: 380px; /* vừa đủ với emoji picker mặc định */
+}
+
+emoji-picker {
+    width: 100%;
+    height: 350px; /* điều chỉnh chiều cao nếu muốn */
+}
+
+
+/* Nút chọn icon custom */
+.btn-icon-picker {
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    color: #fff;
+    font-weight: 500;
+    border: none;
+    border-radius: 0 6px 6px 0 !important;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon-picker:hover {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    transform: scale(1.05);
+}
+
+.btn-icon-picker:active {
+    transform: scale(0.97);
+}
+
