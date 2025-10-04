@@ -30,7 +30,7 @@ public class CategoryServlet extends HttpServlet {
                 showUpdateCategory(request, response);
                 break;
             case "filters":
-                filterCategory(request, response);
+                showFilterCategory(request, response);
                 break;
             default:
                 showAllCategory(request, response);
@@ -89,16 +89,16 @@ public class CategoryServlet extends HttpServlet {
     }
 
 
-    private void filterCategory(HttpServletRequest request, HttpServletResponse response) {
-        String name = request.getParameter("name");
+    private void showFilterCategory(HttpServletRequest request, HttpServletResponse response) {
+        String keyword = request.getParameter("keyword");
         int status = Integer.parseInt(request.getParameter("status"));
         String createdFrom = request.getParameter("createdFrom");
         String createdTo = request.getParameter("createdTo");
-        request.setAttribute("name", name);
+        request.setAttribute("keyword", keyword);
         request.setAttribute("status", status);
         request.setAttribute("createdFrom", createdFrom);
         request.setAttribute("createdTo", createdTo);
-        List<Category> categories = categoryDAO.filterCategory(name, status, createdFrom, createdTo);
+        List<Category> categories = categoryDAO.filterCategory(keyword, status, createdFrom, createdTo);
         request.setAttribute("pageTitle", "Quản lý loại sản phẩm");
         request.setAttribute("pageContent", "../category/list.jsp");
         request.setAttribute("pageCss", "/resources/css/category.css");

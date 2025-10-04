@@ -9,11 +9,6 @@ h2 {
     font-weight: 600;
 }
 
-.table {
-    border-radius: 10px;
-    overflow: hidden;
-}
-
 .table thead {
     background: #4dd0e1;
     color: white;

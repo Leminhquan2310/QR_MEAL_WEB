@@ -1,5 +1,6 @@
 package com.qr_meal_web.dao;
 
+import com.qr_meal_web.enums.CategoryStatus;
 import com.qr_meal_web.model.Category;
 import com.qr_meal_web.util.DBConnection;
 
@@ -8,12 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryDAOImplement implements ICategoryDAO {
-    private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category WHERE status = 1 ORDER BY id";
+    private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category";
     private static final String INSERT_CATEGORY = "INSERT  INTO category (name, description, icon) values (?, ?, ?)";
     private static final String SELECT_CATEGORY = "SELECT * FROM category WHERE id = ?";
     private static final String UPDATE_CATEGORY = "UPDATE category SET name = ?, description = ?, icon = ? WHERE id = ?";
     private static final String DELETE_CATEGORY = "UPDATE category SET status = 0 WHERE id = ?";
-    private static final String FILTERS_CATEGORY = "SELECT * FROM category WHERE  name LIKE ? AND status = ? AND DATE(created_at) BETWEEN ? AND ?";
 
     @Override
     public List<Category> selectAllCategory() {
@@ -25,7 +25,8 @@ public class CategoryDAOImplement implements ICategoryDAO {
                 String name = rs.getString("name");
                 String desc = rs.getString("description");
                 String icon = rs.getString("icon");
-                int status = rs.getInt("status");
+                int statusCode = rs.getInt("status");
+                CategoryStatus status = CategoryStatus.fromCode(statusCode);
                 Timestamp created_at = rs.getTimestamp("created_at");
                 categories.add(new Category(id, name, desc, icon, status, created_at));
             }
@@ -60,7 +61,8 @@ public class CategoryDAOImplement implements ICategoryDAO {
                 String name = rs.getString("name");
                 String desc = rs.getString("description");
                 String icon = rs.getString("icon");
-                int status = rs.getInt("status");
+                int statusCode = rs.getInt("status");
+                CategoryStatus status = CategoryStatus.fromCode(statusCode);
                 Timestamp created_at = rs.getTimestamp("created_at");
                 return new Category(id_cate, name, desc, icon, status, created_at);
             }
@@ -98,14 +100,15 @@ public class CategoryDAOImplement implements ICategoryDAO {
     }
 
     @Override
-    public List<Category> filterCategory(String name, int status, String createdFrom, String createdTo) {
+    public List<Category> filterCategory(String keyword, int status, String createdFrom, String createdTo) {
         List<Category> categories = new ArrayList<>();
         StringBuilder sql = new StringBuilder("SELECT * FROM category WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
-        if (name != null && !name.isEmpty()) {
-            sql.append(" AND name LIKE ?");
-            params.add("%" + name + "%");
+        if (keyword != null && !keyword.isEmpty()) {
+            sql.append(" AND (name LIKE ? OR description LIKE ?)");
+            params.add("%" + keyword + "%");
+            params.add("%" + keyword + "%");
         }
 
         if (status != 2) {
@@ -137,11 +140,10 @@ public class CategoryDAOImplement implements ICategoryDAO {
                 String cate_name = rs.getString("name");
                 String desc = rs.getString("description");
                 String icon = rs.getString("icon");
-                int cate_status = rs.getInt("status");
+                int statusCode = rs.getInt("status");
                 Timestamp created_at = rs.getTimestamp("created_at");
-                categories.add(new Category(id, cate_name, desc,  icon, cate_status, created_at));
+                categories.add(new Category(id, cate_name, desc, icon, CategoryStatus.fromCode(statusCode), created_at));
             }
-            System.out.println(categories.size());
             return categories;
         } catch (SQLException e) {
             e.printStackTrace();

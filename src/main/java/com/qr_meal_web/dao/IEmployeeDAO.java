@@ -15,6 +15,11 @@ public interface IEmployeeDAO {
 
     boolean deleteEmp(int id);
 
+    boolean setInactiveEmployee(int id);
+
     Employee checkLogin(String phone, String password);
 
+    List<Employee> filtersEmployee(String name, int role, String createdFrom, String createdTo);
+
+    boolean checkCanDelete(int id);
 }

@@ -27,6 +27,9 @@ public class Password {
 
 
     public static String hashPassword(String plainPassword) {
+        if (plainPassword.isEmpty()) {
+            return null;
+        }
         String toHash = plainPassword;
         if (PEPPER != null && !PEPPER.isEmpty()) {
             toHash = plainPassword + PEPPER;

@@ -1,5 +1,7 @@
 package com.qr_meal_web.model;
 
+import com.qr_meal_web.enums.EmployeeStatus;
+
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -9,12 +11,12 @@ public class Employee {
     private Role role;
     private String phone;
     private Timestamp created_at;
-    private int status;
+    private EmployeeStatus status;
 
     public Employee() {
     }
 
-    public Employee(int id, String name, Role role, String phone, Timestamp created_at, int status) {
+    public Employee(int id, String name, Role role, String phone, Timestamp created_at, EmployeeStatus status) {
         this.id = id;
         this.name = name;
         this.role = role;
@@ -23,11 +25,11 @@ public class Employee {
         this.status = status;
     }
 
-    public int getStatus() {
+    public EmployeeStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(EmployeeStatus status) {
         this.status = status;
     }
 

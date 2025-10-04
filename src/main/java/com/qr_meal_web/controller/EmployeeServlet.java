@@ -1,11 +1,13 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.EmployeeDAOImp;
+import com.qr_meal_web.dao.EmployeeDAOImplement;
 import com.qr_meal_web.dao.IEmployeeDAO;
 import com.qr_meal_web.dao.IRoleDAO;
 import com.qr_meal_web.dao.RoleDAOImplement;
 import com.qr_meal_web.model.Employee;
+import com.qr_meal_web.model.Product;
 import com.qr_meal_web.model.Role;
+import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,11 +16,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/employee")
 public class EmployeeServlet extends HttpServlet {
-    IEmployeeDAO employeeDAO = new EmployeeDAOImp();
+    IEmployeeDAO employeeDAO = new EmployeeDAOImplement();
+    private List<Role> roles = new RoleDAOImplement().selectAllRole();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -32,6 +38,9 @@ public class EmployeeServlet extends HttpServlet {
                 break;
             case "update":
                 showFormUpdateEmp(request, response);
+                break;
+            case "filters":
+                showFilterEmployee(request, response);
                 break;
             default:
                 showListEmp(request, response);
@@ -64,11 +73,10 @@ public class EmployeeServlet extends HttpServlet {
         request.setAttribute("pageCss", "/resources/css/employee.css");
         request.setAttribute("pageJs", "/resources/js/employee.js");
         request.setAttribute("employees", employees);
+        request.setAttribute("roles", roles);
     }
 
     private void showFormCreateEmp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        IRoleDAO roleDAO = new RoleDAOImplement();
-        List<Role> roles = roleDAO.selectAllRole();
         request.setAttribute("pageTitle", "Thêm nhân viên");
         request.setAttribute("pageContent", "../employee/create.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
@@ -87,6 +95,28 @@ public class EmployeeServlet extends HttpServlet {
         request.setAttribute("pageJs", "/resources/js/employee.js");
         request.setAttribute("roles", roles);
         request.setAttribute("employee", employee);
+    }
+
+    private void showFilterEmployee(HttpServletRequest request, HttpServletResponse response) {
+        String name = request.getParameter("name");
+        int role = Integer.parseInt(request.getParameter("role"));
+        String createdFrom = request.getParameter("createdFrom");
+        String createdTo = request.getParameter("createdTo");
+
+        Map<String, Object> filters = new HashMap<>();
+        filters.put("name", name);
+        filters.put("role", role);
+        filters.put("createdFrom", createdFrom);
+        filters.put("createdTo", createdTo);
+
+        List<Employee> employees = employeeDAO.filtersEmployee(name, role, createdFrom, createdTo);
+        request.setAttribute("pageTitle", "Quản lý nhân viên");
+        request.setAttribute("pageContent", "../employee/list.jsp");
+        request.setAttribute("pageCss", "/resources/css/employee.css");
+        request.setAttribute("pageJs", "/resources/js/employee.js");
+        request.setAttribute("employees", employees);
+        request.setAttribute("roles", roles);
+        request.setAttribute("filters", filters);
     }
 
     //    post .....
@@ -139,24 +169,35 @@ public class EmployeeServlet extends HttpServlet {
         }
     }
 
-    private void deleteEmp(HttpServletRequest request, HttpServletResponse response) {
+    private void deleteEmp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean isSuccess = employeeDAO.deleteEmp(id);
+        boolean canDelete = employeeDAO.checkCanDelete(id);
 
+        String message, status;
         HttpSession session = request.getSession();
-        if (isSuccess) {
-            session.setAttribute("message", "Xóa thành công!");
-            session.setAttribute("status", "success");
+        if (canDelete) {
+            boolean isSuccess = employeeDAO.deleteEmp(id);
+            if (isSuccess) {
+                message = "Xóa nhân viên thành công!";
+                status = "success";
+            } else {
+                message = "Xóa nhân viên thất bại!";
+                status = "error";
+            }
         } else {
-            session.setAttribute("message", "Xóa thất bại!");
-            session.setAttribute("status", "error");
+            boolean isSuccess = employeeDAO.setInactiveEmployee(id);
+            if (isSuccess) {
+                message = "Tài khoản đã được ngưng việc sử dụng!";
+                status = "success";
+            } else {
+                message = "Ngưng sử dụng tài khoản thất bại!";
+                status = "error";
+            }
         }
 
-        try {
-            response.sendRedirect(request.getContextPath() + "/employee");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        session.setAttribute("message", message);
+        session.setAttribute("status", status);
+        response.sendRedirect(request.getContextPath() + "/employee");
     }
 
 }

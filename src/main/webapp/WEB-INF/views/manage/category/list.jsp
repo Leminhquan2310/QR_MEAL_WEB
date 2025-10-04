@@ -1,17 +1,19 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<div class="container"><%-- Button thêm loại sản phẩm --%>
+
+<div class="container">
+    <%-- Button thêm loại sản phẩm --%>
     <div class="col-md-2 d-grid mb-2">
         <a href="/category?action=create" class="btn btn-primary">➕ Thêm mới</a>
     </div>
-    <div class="card shadow-sm mb-3 filter-card">
+    <div class="card shadow-sm mb-3">
         <div class="card-body">
             <form action="/category" method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="action" value="filters">
                 <div class="col-md-3">
                     <label for="keyword" class="form-label fw-semibold">Tên loại</label>
-                    <input type="text" class="form-control custom-input" value="${name}" id="keyword" name="name"
+                    <input type="text" class="form-control custom-input" value="${keyword}" id="keyword" name="keyword"
                            placeholder="Nhập tên hoặc mô tả...">
                 </div>
 
@@ -74,14 +76,7 @@
                         <td>${cate.description}</td>
                         <td><fmt:formatDate value="${cate.created_at}" pattern="dd/MM/yyyy HH:mm:ss"/></td>
                         <td>
-                            <c:choose>
-                                <c:when test="${cate.status == 1}">
-                                    <span class="badge bg-success">Hoạt động</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="badge bg-secondary">Ngừng</span>
-                                </c:otherwise>
-                            </c:choose>
+                            <span class="badge bg-${cate.status.badge}">${cate.status.label}</span>
                         </td>
                         <td>
                             <a href="/category?action=update&id=${cate.id}" class="btn btn-sm btn-warning me-2">✏

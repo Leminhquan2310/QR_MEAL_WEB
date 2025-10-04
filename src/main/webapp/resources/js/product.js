@@ -1,7 +1,19 @@
-const handleDelEmployee = (id) => {
+function previewFile(input) {
+    const file = input.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("previewImage").src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+
+const showDeleteAlert = (id) => {
     Swal.fire({
         title: "Chắc chắn muốn xóa?",
-        text: "Xóa sẽ thay đổi trạng thái hoặc xóa hẳn khi chưa có hoạt động nào!",
+        text: "Xóa sẽ thay đổi trạng thái hoặc xóa hẳn khi không có đơn hàng!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
@@ -12,7 +24,7 @@ const handleDelEmployee = (id) => {
         if (result.isConfirmed) {
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = `/employee?action=delete`;
+            form.action = `/product?action=delete`;
 
             // input hidden chứa id
             const input = document.createElement("input");

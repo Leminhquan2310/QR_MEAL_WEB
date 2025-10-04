@@ -1,6 +1,6 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.EmployeeDAOImp;
+import com.qr_meal_web.dao.EmployeeDAOImplement;
 import com.qr_meal_web.dao.IEmployeeDAO;
 import com.qr_meal_web.model.Employee;
 import jakarta.servlet.ServletException;
@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
-    private IEmployeeDAO empDAO = new EmployeeDAOImp();
+    private IEmployeeDAO empDAO = new EmployeeDAOImplement();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)

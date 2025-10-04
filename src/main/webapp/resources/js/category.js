@@ -1,12 +1,13 @@
 const handleDelCategory = (id) => {
     Swal.fire({
-        title: "Are you sure?",
-        text: "Deleting removes the use of this field!",
+        title: "Chắc chắn muốn xóa?",
+        text: "Xóa sẽ loại bỏ việc sử dụng trường này!",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes, do it!"
+        confirmButtonText: "Xác nhận!",
+        cancelButtonText: "Hủy"
     }).then((result) => {
         if (result.isConfirmed) {
             const form = document.createElement("form");

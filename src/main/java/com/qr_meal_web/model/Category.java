@@ -1,5 +1,7 @@
 package com.qr_meal_web.model;
 
+import com.qr_meal_web.enums.CategoryStatus;
+
 import java.sql.Timestamp;
 
 public class Category {
@@ -8,12 +10,12 @@ public class Category {
     private String description;
     private String icon;
     private Timestamp created_at;
-    private int status;
+    private CategoryStatus status;
 
     public Category() {
     }
 
-    public Category(int id, String name, String description, String icon, int status, Timestamp create_at) {
+    public Category(int id, String name, String description, String icon, CategoryStatus status, Timestamp create_at) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -54,11 +56,11 @@ public class Category {
         this.icon = icon;
     }
 
-    public int getStatus() {
+    public CategoryStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(CategoryStatus status) {
         this.status = status;
     }
 
