@@ -56,6 +56,7 @@
     <div class="sidebar">
         <a href="dashboard.jsp" class="${pageActive == 'dashboard' ? 'active' : ''}">📊 Dashboard</a>
         <a href="employee" class="${pageActive == 'employee' ? 'active' : ''}">👤 Quản lý nhân viên</a>
+        <a href="table" class="${pageActive == 'table' ? 'active' : ''}">🪟 Quản lý bàn</a>
         <a href="product" class="${pageActive == 'product' ? 'active' : ''}">🍜 Sản phẩm</a>
         <a href="category" class="${pageActive == 'category' ? 'active' : ''}">🥗 Phân loại sản phẩm</a>
         <a href="menu.jsp" class="${pageActive == 'menu' ? 'active' : ''}">📋 Menu</a>

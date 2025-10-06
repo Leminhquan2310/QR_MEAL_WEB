@@ -93,7 +93,7 @@
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <h5 class="card-title mb-3">📋 Danh sách sản phẩm</h5>
-            <table class="table table-bordered align-middle text-center" id="categoryTable">
+            <table class="table table-bordered table-hover align-middle text-center" id="categoryTable">
                 <thead class="table-primary">
                 <tr>
                     <th scope="col">ID</th>

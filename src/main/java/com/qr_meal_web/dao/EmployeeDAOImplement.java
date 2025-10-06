@@ -1,10 +1,7 @@
 package com.qr_meal_web.dao;
 
 import com.qr_meal_web.enums.EmployeeStatus;
-import com.qr_meal_web.enums.ProductStatus;
-import com.qr_meal_web.model.Category;
 import com.qr_meal_web.model.Employee;
-import com.qr_meal_web.model.Product;
 import com.qr_meal_web.model.Role;
 import com.qr_meal_web.util.DBConnection;
 import com.qr_meal_web.util.Password;

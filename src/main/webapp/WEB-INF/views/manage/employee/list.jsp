@@ -54,7 +54,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <h5 class="card-title mb-3">📋 Danh sách nhân viên</h5>
-            <table class="table table-bordered align-middle text-center">
+            <table class="table table-bordered table-hover align-middle text-center">
                 <thead class="table-primary">
                 <tr>
                     <th>ID</th>
