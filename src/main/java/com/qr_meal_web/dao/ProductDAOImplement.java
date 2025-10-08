@@ -182,6 +182,42 @@ public class ProductDAOImplement implements IProductDAO {
     }
 
     @Override
+    public List<Product> selectProductForClient(int category) {
+        List<Product> products = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(SELECT_ALL_PRODUCT + " WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (category >= 0) {
+            sql.append(" AND category_id = ?");
+            params.add(category);
+        }
+
+        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                statement.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String desc = rs.getString("description");
+                double price = rs.getDouble("price");
+                int statusCode = rs.getInt("status");
+                Category cate = new Category();
+                cate.setId(rs.getInt("c_id"));
+                cate.setName(rs.getString("c_name"));
+                cate.setIcon(rs.getString("c_icon"));
+                String image = rs.getString("image");
+                int cooking_time = rs.getInt("cooking_time");
+                products.add(new Product(id, name, desc, price, ProductStatus.fromCode(statusCode), cate, image, cooking_time));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
+
+    @Override
     public boolean deleteProduct(int id) {
         try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_PRODUCT)) {
             statement.setInt(1, id);

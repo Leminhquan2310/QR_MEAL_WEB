@@ -175,7 +175,11 @@ public class ProductServlet extends HttpServlet {
 
         // xử l file image
         Part filePart = request.getPart("image");
-        String imageBase64 = FileUtil.toBase64(filePart);
+
+        String imageBase64 = "";
+        if (filePart.getSize() > 0) {
+            imageBase64 = FileUtil.toBase64(filePart);
+        }
 
         Product product = new Product();
         product.setId(id);

@@ -112,7 +112,7 @@
                     <tr>
                         <td>${pro.id}</td>
                         <td>
-                            <img src="data:image/gif;base64,${pro.image}" alt="${pro.name}" class="img-thumbnail"
+                            <img src="${pro.image}" alt="${pro.name}" class="img-thumbnail"
                                  style="width: 70px; height: 70px; object-fit: contain;">
                         </td>
                         <td>${pro.name}</td>

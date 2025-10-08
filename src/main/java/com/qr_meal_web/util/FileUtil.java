@@ -10,7 +10,7 @@ public class FileUtil {
     public static String toBase64(Part part) throws IOException {
         try (InputStream inputStream = part.getInputStream()) {
             byte[] fileBytes = inputStream.readAllBytes();
-            return Base64.getEncoder().encodeToString(fileBytes);
+            return "data:image/png;base64," + Base64.getEncoder().encodeToString(fileBytes);
         }
     }
 }

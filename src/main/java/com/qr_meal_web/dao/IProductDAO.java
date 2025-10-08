@@ -19,4 +19,6 @@ public interface IProductDAO {
     boolean checkProductDeletable(int id);
 
     List<Product> filterProduct(String keyword, double minPrice, double maxPrice, int category, int status);
+
+    List<Product> selectProductForClient(int category);
 }

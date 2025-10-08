@@ -43,7 +43,8 @@
                     <label for="category" class="form-label fw-semibold">Danh mục</label>
                     <select class="form-select" id="category" name="category_id" required>
                         <c:forEach var="cate" items="${categories}">
-                            <option ${cate.id == product.category.id ? "selected" : ""} value="${cate.id}">${cate.name}</option>
+                            <option ${cate.id == product.category.id ? "selected" : ""}
+                                    value="${cate.id}">${cate.name}</option>
                         </c:forEach>
                     </select>
                 </div>
@@ -60,7 +61,7 @@
                     <div class="d-flex justify-content-center align-items-center border rounded p-2 mt-2"
                          style="width: 100%; max-width: 200px; height: 200px; overflow: hidden;">
                         <img id="previewImage"
-                             src="data:image/gif;base64,${product.image}"
+                             src="${product.image}"
                              alt="Image Preview"
                              class="img-fluid"
                              style="object-fit: contain; max-width: 100%; max-height: 100%;"
@@ -73,7 +74,7 @@
                     <label for="cooking_time" class="form-label fw-semibold">Thời gian chế biến
                         (phút)</label>
                     <input type="number" class="form-control" id="cooking_time" name="cooking_time" min="0"
-                          value="${product.cooking_time}"  placeholder="Ví dụ: 15">
+                           value="${product.cooking_time}" placeholder="Ví dụ: 15">
                 </div>
             </div>
 
