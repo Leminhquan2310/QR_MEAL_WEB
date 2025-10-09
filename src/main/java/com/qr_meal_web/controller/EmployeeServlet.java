@@ -1,13 +1,10 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.EmployeeDAOImplement;
-import com.qr_meal_web.dao.IEmployeeDAO;
-import com.qr_meal_web.dao.IRoleDAO;
-import com.qr_meal_web.dao.RoleDAOImplement;
 import com.qr_meal_web.model.Employee;
-import com.qr_meal_web.model.Product;
 import com.qr_meal_web.model.Role;
-import com.qr_meal_web.util.Helper;
+import com.qr_meal_web.service.EmployeeService;
+import com.qr_meal_web.service.impl.EmployeeServiceImpl;
+import com.qr_meal_web.service.impl.RoleServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -22,8 +19,8 @@ import java.util.Map;
 
 @WebServlet("/employee")
 public class EmployeeServlet extends HttpServlet {
-    IEmployeeDAO employeeDAO = new EmployeeDAOImplement();
-    private List<Role> roles = new RoleDAOImplement().selectAllRole();
+    private final EmployeeService employeeService = new EmployeeServiceImpl();
+    private final List<Role> roles = new RoleServiceImpl().selectAllRole();
 
 
     @Override
@@ -67,7 +64,7 @@ public class EmployeeServlet extends HttpServlet {
     }
 
     private void showListEmp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Employee> employees = employeeDAO.selectAllEmp();
+        List<Employee> employees = employeeService.selectAllEmp();
         request.setAttribute("pageTitle", "Quản lý nhân viên");
         request.setAttribute("pageContent", "../employee/list.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
@@ -86,9 +83,7 @@ public class EmployeeServlet extends HttpServlet {
 
     private void showFormUpdateEmp(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
-        Employee employee = employeeDAO.selectById(id);
-        IRoleDAO roleDAO = new RoleDAOImplement();
-        List<Role> roles = roleDAO.selectAllRole();
+        Employee employee = employeeService.selectById(id);
         request.setAttribute("pageTitle", "Sửa thông tin nhân viên");
         request.setAttribute("pageContent", "../employee/update.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
@@ -109,7 +104,7 @@ public class EmployeeServlet extends HttpServlet {
         filters.put("createdFrom", createdFrom);
         filters.put("createdTo", createdTo);
 
-        List<Employee> employees = employeeDAO.filtersEmployee(name, role, createdFrom, createdTo);
+        List<Employee> employees = employeeService.filtersEmployee(name, role, createdFrom, createdTo);
         request.setAttribute("pageTitle", "Quản lý nhân viên");
         request.setAttribute("pageContent", "../employee/list.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
@@ -125,7 +120,7 @@ public class EmployeeServlet extends HttpServlet {
         int role_id = Integer.parseInt(request.getParameter("role"));
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
-        boolean created = employeeDAO.insertEmp(name, role_id, phone, password);
+        boolean created = employeeService.insertEmp(name, role_id, phone, password);
 
         HttpSession session = request.getSession();
         if (created) {
@@ -150,7 +145,7 @@ public class EmployeeServlet extends HttpServlet {
         int role = Integer.parseInt(request.getParameter("role"));
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
-        boolean isSuccess = employeeDAO.updateEmp(id, name, role, phone, password);
+        boolean isSuccess = employeeService.updateEmp(id, name, role, phone, password);
 
         HttpSession session = request.getSession();
         if (isSuccess) {
@@ -171,12 +166,12 @@ public class EmployeeServlet extends HttpServlet {
 
     private void deleteEmp(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean canDelete = employeeDAO.checkCanDelete(id);
+        boolean canDelete = employeeService.checkCanDelete(id);
 
         String message, status;
         HttpSession session = request.getSession();
         if (canDelete) {
-            boolean isSuccess = employeeDAO.deleteEmp(id);
+            boolean isSuccess = employeeService.deleteEmp(id);
             if (isSuccess) {
                 message = "Xóa nhân viên thành công!";
                 status = "success";
@@ -185,7 +180,7 @@ public class EmployeeServlet extends HttpServlet {
                 status = "error";
             }
         } else {
-            boolean isSuccess = employeeDAO.setInactiveEmployee(id);
+            boolean isSuccess = employeeService.setInactiveEmployee(id);
             if (isSuccess) {
                 message = "Tài khoản đã được ngưng việc sử dụng!";
                 status = "success";

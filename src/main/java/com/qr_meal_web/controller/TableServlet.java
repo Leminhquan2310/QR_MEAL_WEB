@@ -1,8 +1,8 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.ITableDAO;
-import com.qr_meal_web.dao.TableDAOImplement;
 import com.qr_meal_web.model.Table;
+import com.qr_meal_web.service.TableService;
+import com.qr_meal_web.service.impl.TableServiceImpl;
 import com.qr_meal_web.util.QRCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 @WebServlet(name = "TableServlet", urlPatterns = "/table")
 public class TableServlet extends HttpServlet {
-    private ITableDAO tableDAO = new TableDAOImplement();
+    private final TableService tableService = new TableServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -59,7 +59,7 @@ public class TableServlet extends HttpServlet {
     }
 
     private void showAllTable(HttpServletRequest request, HttpServletResponse response) {
-        List<Table> tables = tableDAO.selectAllTable();
+        List<Table> tables = tableService.selectAllTable();
         request.setAttribute("pageTitle", "Quản lý bàn");
         request.setAttribute("pageContent", "../table/list.jsp");
         request.setAttribute("tables", tables);
@@ -72,7 +72,7 @@ public class TableServlet extends HttpServlet {
         filters.put("createdFrom", createdFrom);
         filters.put("createdTo", createdTo);
 
-        List<Table> tables = tableDAO.filtersTable(createdFrom, createdTo);
+        List<Table> tables = tableService.filtersTable(createdFrom, createdTo);
         request.setAttribute("pageTitle", "Quản lý bàn");
         request.setAttribute("pageContent", "../table/list.jsp");
         request.setAttribute("tables", tables);
@@ -95,7 +95,7 @@ public class TableServlet extends HttpServlet {
     //    -------------- do post -----------------
     private void handleCreateTable(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");
-        boolean created = tableDAO.insertTable(name);
+        boolean created = tableService.insertTable(name);
 
         HttpSession session = request.getSession();
         if (created) {
@@ -113,7 +113,7 @@ public class TableServlet extends HttpServlet {
         String qr_code = request.getParameter("qr_code");
         String name = request.getParameter("name");
 
-        boolean isSuccess = tableDAO.updateTable(id, qr_code, name);
+        boolean isSuccess = tableService.updateTable(id, qr_code, name);
 
         HttpSession session = request.getSession();
         if (isSuccess) {
@@ -128,12 +128,12 @@ public class TableServlet extends HttpServlet {
 
     private void handleDeleteTable(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean canDelete = tableDAO.checkCanDelete(id);
+        boolean canDelete = tableService.checkCanDelete(id);
 
         String message, status;
         HttpSession session = request.getSession();
         if (canDelete) {
-            boolean isSuccess = tableDAO.deleteTable(id);
+            boolean isSuccess = tableService.deleteTable(id);
             if (isSuccess) {
                 message = "Xóa nhân viên thành công!";
                 status = "success";
@@ -142,7 +142,7 @@ public class TableServlet extends HttpServlet {
                 status = "error";
             }
         } else {
-            boolean isSuccess = tableDAO.setInactive(id);
+            boolean isSuccess = tableService.setInactive(id);
             if (isSuccess) {
                 message = "Tài khoản đã được ngưng việc sử dụng!";
                 status = "success";

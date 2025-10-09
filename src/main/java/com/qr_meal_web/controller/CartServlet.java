@@ -1,10 +1,11 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.Cart;
-import com.qr_meal_web.dao.IProductDAO;
-import com.qr_meal_web.dao.ProductDAOImplement;
 import com.qr_meal_web.model.CartItem;
 import com.qr_meal_web.model.Product;
+import com.qr_meal_web.service.CartService;
+import com.qr_meal_web.service.ProductService;
+import com.qr_meal_web.service.impl.CartServiceImpl;
+import com.qr_meal_web.service.impl.ProductServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -16,7 +17,7 @@ import java.io.IOException;
 
 @WebServlet("/cart")
 public class CartServlet extends HttpServlet {
-    private IProductDAO productDAO = new ProductDAOImplement();
+    private ProductService productService = new ProductServiceImpl();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -41,9 +42,9 @@ public class CartServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         int delta = Integer.parseInt(request.getParameter("delta"));
         HttpSession session = request.getSession();
-        Cart cart = (Cart) session.getAttribute("cart");
+        CartService cart = (CartService) session.getAttribute("cart");
         if (cart == null) {
-            cart = new Cart();
+            cart = new CartServiceImpl();
             session.setAttribute("cart", cart);
         }
         cart.updateQuantity(id, delta);
@@ -56,9 +57,9 @@ public class CartServlet extends HttpServlet {
     private void removeFromCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         HttpSession session = request.getSession();
-        Cart cart = (Cart) session.getAttribute("cart");
+        CartService cart = (CartService) session.getAttribute("cart");
         if (cart == null) {
-            cart = new Cart();
+            cart = new CartServiceImpl();
             session.setAttribute("cart", cart);
         }
         cart.removeItem(id);
@@ -71,12 +72,12 @@ public class CartServlet extends HttpServlet {
     private void addToCart(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         HttpSession session = request.getSession();
-        Cart cart = (Cart) session.getAttribute("cart");
+        CartService cart = (CartService) session.getAttribute("cart");
         if (cart == null) {
-            cart = new Cart();
+            cart = new CartServiceImpl();
             session.setAttribute("cart", cart);
         }
-        Product p = productDAO.selectById(id);
+        Product p = productService.selectById(id);
         if (p != null) {
             cart.addItem(p, 1);
         }
@@ -86,7 +87,7 @@ public class CartServlet extends HttpServlet {
         response.getWriter().write(cartToJson(cart));
     }
 
-    private String cartToJson(Cart cart) {
+    private String cartToJson(CartService cart) {
         StringBuilder sb = new StringBuilder();
         sb.append("{\"totalAmount\":").append(cart.getTotalAmount())
                 .append(",\"totalQuantity\":").append(cart.getTotalQuantity()).append(",\"items\":[");

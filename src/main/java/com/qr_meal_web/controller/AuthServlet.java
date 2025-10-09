@@ -1,8 +1,8 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.EmployeeDAOImplement;
-import com.qr_meal_web.dao.IEmployeeDAO;
 import com.qr_meal_web.model.Employee;
+import com.qr_meal_web.service.EmployeeService;
+import com.qr_meal_web.service.impl.EmployeeServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,7 +14,7 @@ import java.io.IOException;
 
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
-    private IEmployeeDAO empDAO = new EmployeeDAOImplement();
+    private final EmployeeService employeeService = new EmployeeServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -23,7 +23,6 @@ public class AuthServlet extends HttpServlet {
         if (session != null) {
             session.invalidate(); // huỷ session
         }
-        // Forward đến JSP login trong WEB-INF
         request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
     }
 
@@ -33,7 +32,7 @@ public class AuthServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
 
-        Employee resultCheckLogin = empDAO.checkLogin(phone, password);
+        Employee resultCheckLogin = employeeService.checkLogin(phone, password);
 
         if (resultCheckLogin != null) {
             HttpSession session = request.getSession();

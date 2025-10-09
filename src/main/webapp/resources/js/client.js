@@ -16,6 +16,7 @@ function renderCart(cart) {
     // Nếu không có sản phẩm
     if (!cart.items || cart.items.length === 0) {
         if (container) container.innerHTML = "";
+        document.getElementById("btn-checkout").classList.add("disabled")
         if (cartEmpty) {
             cartEmpty.classList.remove("d-none");
             cartEmpty.textContent = "Giỏ hàng của bạn đang trống.";
@@ -33,8 +34,8 @@ function renderCart(cart) {
     } else {
         if (cartEmpty) cartEmpty.classList.add("d-none");
         container.classList.remove("d-none");
+        document.getElementById("btn-checkout").classList.remove("disabled");
     }
-
 
 
     // Render sản phẩm

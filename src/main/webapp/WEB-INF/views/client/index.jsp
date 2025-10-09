@@ -1,4 +1,4 @@
-<%@ page import="com.qr_meal_web.dao.Cart" %>
+<%@ page import="com.qr_meal_web.repository.impl.Cart" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -13,6 +13,25 @@
     <link rel="stylesheet" href="resources/css/client.css">
 </head>
 <body>
+
+<!-- Thông báo -->
+<c:if test="${not empty message}">
+    <script>
+        window.addEventListener("DOMContentLoaded", function () {
+            const message = "${sessionScope.message}";
+            const status = "${sessionScope.status}"; // success | error | warning
+
+            Swal.fire({
+                title: status === "success" ? "Thành công!" : "Thất bại!",
+                text: message,
+                icon: status
+            });
+        });
+    </script>
+
+    <c:remove var="message" scope="session"/>
+    <c:remove var="status" scope="session"/>
+</c:if>
 
 <div class="container py-5">
     <h2 class="text-center mb-4 fw-bold">Sản phẩm nổi bật</h2>
@@ -78,13 +97,13 @@
 </a>
 
 <!-- MOBILE CART BAR -->
-<div class="cart-bar" id="cart-icon-mobile">
+<div class="cart-bar" id="cart-icon-mobile" data-bs-toggle="modal" data-bs-target="#cartModal">
     <div class="cart-info">
         <i class="bi bi-cart3 fs-4"></i>
         SL: <span class="cart-count">${cart.totalQuantity}</span>
         | Tổng: <span><fmt:formatNumber value="${cart.totalAmount}"/> ₫</span>
     </div>
-    <a href="#" class="btn-view" data-bs-toggle="modal" data-bs-target="#cartModal">Gọi món</a>
+    <a href="#" class="btn-view" >Gọi món</a>
 </div>
 
 <!-- MODAL -->
@@ -155,13 +174,17 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <a href="${pageContext.request.contextPath}/checkout" class="btn btn-success">Gọi món</a>
+                <form action="${pageContext.request.contextPath}/order" method="POST">
+                    <input type="hidden" name="action" value="create">
+                    <button type="submit" class="btn btn-success disabled" id="btn-checkout">Gọi món</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="resources/js/client.js"></script>
 </body>
 </html>

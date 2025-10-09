@@ -35,7 +35,13 @@ public class DBConnection {
         }
     }
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(url, username, password);
+    public static Connection getConnection() {
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(url, username, password);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return connection;
     }
 }

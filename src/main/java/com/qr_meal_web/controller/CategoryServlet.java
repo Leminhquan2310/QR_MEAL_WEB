@@ -1,8 +1,10 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.CategoryDAOImplement;
-import com.qr_meal_web.dao.ICategoryDAO;
+import com.qr_meal_web.repository.impl.CategoryRepositoryImpl;
+import com.qr_meal_web.repository.CategoryRepository;
 import com.qr_meal_web.model.Category;
+import com.qr_meal_web.service.CategoryService;
+import com.qr_meal_web.service.impl.CategoryServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,7 +17,7 @@ import java.util.List;
 
 @WebServlet(name = "CategoryServlet", urlPatterns = "/category")
 public class CategoryServlet extends HttpServlet {
-    ICategoryDAO categoryDAO = new CategoryDAOImplement();
+    CategoryService categoryService = new CategoryServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -59,7 +61,7 @@ public class CategoryServlet extends HttpServlet {
 
 
     private void showAllCategory(HttpServletRequest request, HttpServletResponse response) {
-        List<Category> categories = categoryDAO.selectAllCategory();
+        List<Category> categories = categoryService.selectAllCategory();
         request.setAttribute("pageTitle", "Quản lý loại sản phẩm");
         request.setAttribute("pageContent", "../category/list.jsp");
         request.setAttribute("pageCss", "/resources/css/category.css");
@@ -75,7 +77,7 @@ public class CategoryServlet extends HttpServlet {
 
     private void showUpdateCategory(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        Category category = categoryDAO.selectCategory(id);
+        Category category = categoryService.selectCategory(id);
         request.setAttribute("pageTitle", "Sửa loại sản phẩm");
         request.setAttribute("pageContent", "../category/update.jsp");
         request.setAttribute("pageCss", "/resources/css/category.css");
@@ -98,7 +100,7 @@ public class CategoryServlet extends HttpServlet {
         request.setAttribute("status", status);
         request.setAttribute("createdFrom", createdFrom);
         request.setAttribute("createdTo", createdTo);
-        List<Category> categories = categoryDAO.filterCategory(keyword, status, createdFrom, createdTo);
+        List<Category> categories = categoryService.filterCategory(keyword, status, createdFrom, createdTo);
         request.setAttribute("pageTitle", "Quản lý loại sản phẩm");
         request.setAttribute("pageContent", "../category/list.jsp");
         request.setAttribute("pageCss", "/resources/css/category.css");
@@ -111,7 +113,7 @@ public class CategoryServlet extends HttpServlet {
         String name = request.getParameter("name");
         String desc = request.getParameter("description");
         String icon = request.getParameter("icon");
-        boolean isSuccess = categoryDAO.insertCategory(name, desc, icon);
+        boolean isSuccess = categoryService.insertCategory(name, desc, icon);
 
         HttpSession session = request.getSession();
         if (isSuccess) {
@@ -128,7 +130,7 @@ public class CategoryServlet extends HttpServlet {
         String name = request.getParameter("name");
         String desc = request.getParameter("description");
         String icon = request.getParameter("icon");
-        boolean isSuccess = categoryDAO.updateCategory(id, name, desc, icon);
+        boolean isSuccess = categoryService.updateCategory(id, name, desc, icon);
 
         HttpSession session = request.getSession();
         if (isSuccess) {
@@ -142,7 +144,7 @@ public class CategoryServlet extends HttpServlet {
 
     private void deleteCategory(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean isDeleted = categoryDAO.deleteCategory(id);
+        boolean isDeleted = categoryService.deleteCategory(id);
 
         HttpSession session = request.getSession();
         if (isDeleted) {

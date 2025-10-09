@@ -1,11 +1,13 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.CategoryDAOImplement;
-import com.qr_meal_web.dao.IProductDAO;
-import com.qr_meal_web.dao.ProductDAOImplement;
+import com.qr_meal_web.repository.impl.CategoryRepositoryImpl;
+import com.qr_meal_web.repository.ProductRepository;
+import com.qr_meal_web.repository.impl.ProductRepositoryImpl;
 import com.qr_meal_web.enums.ProductStatus;
 import com.qr_meal_web.model.Category;
 import com.qr_meal_web.model.Product;
+import com.qr_meal_web.service.ProductService;
+import com.qr_meal_web.service.impl.ProductServiceImpl;
 import com.qr_meal_web.util.FileUtil;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
@@ -23,9 +25,9 @@ import java.util.*;
 )
 @WebServlet(name = "ProductServlet", urlPatterns = "/product")
 public class ProductServlet extends HttpServlet {
-    private IProductDAO productDAO = new ProductDAOImplement();
-    private List<Category> categories = new CategoryDAOImplement().selectAllCategory();
-    private List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
+    private final ProductService productService = new ProductServiceImpl();
+    private final List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
+    private final List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
 
 
     @Override
@@ -69,7 +71,7 @@ public class ProductServlet extends HttpServlet {
     }
 
     private void showAllProduct(HttpServletRequest request, HttpServletResponse response) {
-        List<Product> products = productDAO.selectAllProduct();
+        List<Product> products = productService.selectAllProduct();
         request.setAttribute("pageTitle", "Quản lý sản phẩm");
         request.setAttribute("pageContent", "../product/list.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
@@ -80,7 +82,7 @@ public class ProductServlet extends HttpServlet {
 
     private void showCreateProduct(HttpServletRequest request, HttpServletResponse response) {
         List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
-        List<Category> categories = new CategoryDAOImplement().selectAllCategory();
+        List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
         request.setAttribute("pageTitle", "Thêm mới sản phẩm");
         request.setAttribute("pageContent", "../product/create.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
@@ -91,8 +93,8 @@ public class ProductServlet extends HttpServlet {
     private void showUpdateProduct(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
         List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
-        List<Category> categories = new CategoryDAOImplement().selectAllCategory();
-        Product product = productDAO.selectById(id);
+        List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
+        Product product = productService.selectById(id);
         request.setAttribute("pageTitle", "Chỉnh sửa sản phẩm");
         request.setAttribute("pageContent", "../product/update.jsp");
 //        request.setAttribute("pageCss", "/resources/css/product.css");
@@ -115,7 +117,7 @@ public class ProductServlet extends HttpServlet {
         filters.put("category", category);
         filters.put("status", status);
 
-        List<Product> products = productDAO.filterProduct(keyword, minPrice, maxPrice, category, status);
+        List<Product> products = productService.filterProduct(keyword, minPrice, maxPrice, category, status);
         request.setAttribute("pageTitle", "Quản lý sản phẩm");
         request.setAttribute("pageContent", "../product/list.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
@@ -150,7 +152,7 @@ public class ProductServlet extends HttpServlet {
         product.setImage(imageBase64);
         product.setCooking_time(cookingTime);
 
-        boolean isSuccess = productDAO.insertProduct(product);
+        boolean isSuccess = productService.insertProduct(product);
         HttpSession session = request.getSession();
         if (isSuccess) {
             session.setAttribute("message", "Thêm mới thành công!");
@@ -191,7 +193,7 @@ public class ProductServlet extends HttpServlet {
         product.setImage(imageBase64);
         product.setCooking_time(cookingTime);
 
-        boolean isSuccess = productDAO.updateProduct(product);
+        boolean isSuccess = productService.updateProduct(product);
         HttpSession session = request.getSession();
         if (isSuccess) {
             session.setAttribute("message", "Chỉnh sửa sản phẩm thành công!");
@@ -204,11 +206,11 @@ public class ProductServlet extends HttpServlet {
 
     private void handleDeleteProduct(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean canDelete = productDAO.checkProductDeletable(id);
+        boolean canDelete = productService.checkProductDeletable(id);
 
         HttpSession session = request.getSession();
         if (canDelete) {
-            boolean isSuccess = productDAO.deleteProduct(id);
+            boolean isSuccess = productService.deleteProduct(id);
             if (isSuccess) {
                 session.setAttribute("message", "Xóa sản phẩm thành công!");
                 session.setAttribute("status", "success");

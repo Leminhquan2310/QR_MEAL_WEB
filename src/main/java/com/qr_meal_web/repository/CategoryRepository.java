@@ -1,10 +1,10 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.repository;
 
 import com.qr_meal_web.model.Category;
 
 import java.util.List;
 
-public interface ICategoryDAO {
+public interface CategoryRepository {
     List<Category> selectAllCategory();
 
     boolean insertCategory(String name, String description, String icon);
@@ -15,5 +15,5 @@ public interface ICategoryDAO {
 
     boolean deleteCategory(int id);
 
-    List<Category> filterCategory(String name, int status, String createdFrom, String createdTo);
+    List<Category> filterCategory(String filterString, List<Object> params);
 }

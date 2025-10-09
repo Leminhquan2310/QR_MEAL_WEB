@@ -1,6 +1,7 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.repository.impl;
 
 import com.qr_meal_web.model.Role;
+import com.qr_meal_web.repository.RoleRepository;
 import com.qr_meal_web.util.DBConnection;
 
 import java.sql.Connection;
@@ -10,12 +11,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RoleDAOImplement implements IRoleDAO{
+public class RoleRepositoryImpl implements RoleRepository {
+    private final Connection connection = DBConnection.getConnection();
     private static final String SELECT_ALL = "SELECT * FROM role";
+
     @Override
     public List<Role> selectAllRole() {
         List<Role> roles = new ArrayList<>();
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(SELECT_ALL)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL)) {
             ResultSet rs = statement.executeQuery();
             while (rs.next()){
                 int id = rs.getInt("id");
@@ -24,7 +27,7 @@ public class RoleDAOImplement implements IRoleDAO{
                 roles.add(new Role(id, name, color));
             }
         } catch (SQLException e) {
-           e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         return roles;
     }

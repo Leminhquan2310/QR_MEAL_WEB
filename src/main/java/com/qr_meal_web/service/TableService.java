@@ -1,10 +1,10 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.service;
 
 import com.qr_meal_web.model.Table;
 
 import java.util.List;
 
-public interface ITableDAO {
+public interface TableService {
     List<Table> selectAllTable();
 
     List<Table> filtersTable(String createdFrom, String createdTo);

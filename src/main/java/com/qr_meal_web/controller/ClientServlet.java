@@ -1,7 +1,12 @@
 package com.qr_meal_web.controller;
 
-import com.qr_meal_web.dao.*;
 import com.qr_meal_web.model.*;
+import com.qr_meal_web.service.CartService;
+import com.qr_meal_web.service.CategoryService;
+import com.qr_meal_web.service.ProductService;
+import com.qr_meal_web.service.impl.CartServiceImpl;
+import com.qr_meal_web.service.impl.CategoryServiceImpl;
+import com.qr_meal_web.service.impl.ProductServiceImpl;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,8 +17,8 @@ import java.util.List;
 
 @WebServlet(name = "ClientServlet", urlPatterns = "/client")
 public class ClientServlet extends HttpServlet {
-    private final IProductDAO productDAO = new ProductDAOImplement();
-    private final ICategoryDAO categoryDAO = new CategoryDAOImplement();
+    private final ProductService productService = new ProductServiceImpl();
+    private final CategoryService categoryService = new CategoryServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -40,10 +45,10 @@ public class ClientServlet extends HttpServlet {
             throws IOException, ServletException {
 
         HttpSession session = request.getSession();
-        String tableIdParam = request.getParameter("table-id");
+        int tableIdParam = Helper.parseIntegerSafe(request.getParameter("table-id"), -1);
 
         // lưu table-id lần đầu
-        if (tableIdParam != null) {
+        if (tableIdParam > 0) {
             session.setAttribute("tableId", tableIdParam);
         } else if (session.getAttribute("tableId") == null) {
             response.sendRedirect(request.getContextPath() + "/error");
@@ -51,8 +56,8 @@ public class ClientServlet extends HttpServlet {
         }
 
         int category = Helper.parseIntegerSafe(request.getParameter("category"), -1);
-        List<Product> products = productDAO.selectProductForClient(category);
-        List<Category> categories = categoryDAO.selectAllCategory();
+        List<Product> products = productService.selectProductForClient(category);
+        List<Category> categories = categoryService.selectAllCategory();
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
 
@@ -61,14 +66,14 @@ public class ClientServlet extends HttpServlet {
 
     private void addToCart(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
-        Cart cart = (Cart) session.getAttribute("cart");
+        CartService cart = (CartService) session.getAttribute("cart");
         if (cart == null) {
-            cart = new Cart();
+            cart = new CartServiceImpl();
             session.setAttribute("cart", cart);
         }
 
         int id = Integer.parseInt(request.getParameter("id"));
-        Product p = productDAO.selectById(id);
+        Product p = productService.selectById(id);
         if (p != null) {
             cart.addItem(p, 1);
         }

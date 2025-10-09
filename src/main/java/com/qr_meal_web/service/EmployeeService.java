@@ -1,10 +1,10 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.service;
 
 import com.qr_meal_web.model.Employee;
 
 import java.util.List;
 
-public interface IEmployeeDAO {
+public interface EmployeeService {
     List<Employee> selectAllEmp();
 
     boolean insertEmp(String name, int role, String phone, String password);

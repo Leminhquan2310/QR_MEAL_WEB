@@ -1,7 +1,8 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.repository.impl;
 
 import com.qr_meal_web.enums.TableStatus;
 import com.qr_meal_web.model.Table;
+import com.qr_meal_web.repository.TableRepository;
 import com.qr_meal_web.util.DBConnection;
 import com.qr_meal_web.util.QRCode;
 
@@ -10,8 +11,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TableDAOImplement implements ITableDAO {
+public class TableRepositoryImpl implements TableRepository {
+    private final Connection connection = DBConnection.getConnection();
     private static final String SELECT_ALL_TABLE = "SELECT * FROM `table`";
+    private static final String FILTER_TABLE = "SELECT * FROM `table` WHERE 1=1";
     private static final String INSERT_TABLE = "INSERT INTO `table` (name) values (?)";
     private static final String UPDATE_TABLE = "UPDATE `table` SET qr_code = ?, name = ? WHERE id = ?";
     private static final String UPDATE_QR_CODE = "UPDATE `table` SET qr_code = ? WHERE id = ?";
@@ -19,15 +22,10 @@ public class TableDAOImplement implements ITableDAO {
     private static final String DELETE_TABLE = "DELETE FROM `table` WHERE id = ?";
     private static final String SET_INACTIVE = "UPDATE `table` SET status = 0 WHERE id = ?";
 
-    private static PreparedStatement getStatement(String sql) throws SQLException {
-        Connection connection = DBConnection.getConnection();
-        return connection.prepareStatement(sql);
-    }
-
     @Override
     public List<Table> selectAllTable() {
         List<Table> tables = new ArrayList<>();
-        try (PreparedStatement statement = getStatement(SELECT_ALL_TABLE)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_TABLE)) {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -40,31 +38,15 @@ public class TableDAOImplement implements ITableDAO {
                 tables.add(new Table(id, name, qr_code, created_at, updated_at, status));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            System.out.println(e.getMessage());
         }
         return tables;
     }
 
     @Override
-    public List<Table> filtersTable(String createdFrom, String createdTo) {
+    public List<Table> filtersTable(String filterString, List<Object> params) {
         List<Table> tables = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM `table` WHERE 1=1");
-        List<Object> params = new ArrayList<>();
-
-        // Filter theo khoảng ngày
-        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
-            sql.append(" AND created_at BETWEEN ? AND ?");
-            params.add(Timestamp.valueOf(createdFrom + " 00:00:00"));
-            params.add(Timestamp.valueOf(createdTo + " 23:59:59"));
-        } else if (createdFrom != null && !createdFrom.isEmpty()) {
-            sql.append(" AND created_at >= ?");
-            params.add(Timestamp.valueOf(createdFrom + " 00:00:00"));
-        } else if (createdTo != null && !createdTo.isEmpty()) {
-            sql.append(" AND created_at <= ?");
-            params.add(Timestamp.valueOf(createdTo + " 23:59:59"));
-        }
-
-        try (PreparedStatement statement = getStatement(sql.toString())) {
+        try (PreparedStatement statement = connection.prepareStatement(FILTER_TABLE + filterString)) {
             for (int i = 0; i < params.size(); i++) {
                 statement.setObject(i + 1, params.get(i));
             }
@@ -80,16 +62,20 @@ public class TableDAOImplement implements ITableDAO {
                 tables.add(new Table(id, name, qr_code, created_at, updated_at, status));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+           System.out.println(e.getMessage());
         }
         return tables;
     }
 
     @Override
     public boolean insertTable(String name) {
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statementInsert = connection.prepareStatement(INSERT_TABLE, Statement.RETURN_GENERATED_KEYS);
-             PreparedStatement statementUpdate = getStatement(UPDATE_QR_CODE)) {
+        try {
+            connection.setAutoCommit(false);
+
+            PreparedStatement statementInsert =
+                    connection.prepareStatement(INSERT_TABLE, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement statementUpdate = connection.prepareStatement(UPDATE_QR_CODE);
+
             statementInsert.setString(1, name);
             int resultInsert = statementInsert.executeUpdate();
 
@@ -98,36 +84,54 @@ public class TableDAOImplement implements ITableDAO {
             if (rs.next())
                 table_id = rs.getInt(1);
 
-            if (resultInsert == 1) {
-                String qr_code = QRCode.generateBase64QRCode(table_id);
-                statementUpdate.setString(1, qr_code);
-                statementUpdate.setInt(2, table_id);
+            if (resultInsert != 1) return false;
 
-                int result = statementUpdate.executeUpdate();
-                return result > 0;
-            }
+            String qr_code = QRCode.generateBase64QRCode(table_id);
+            statementUpdate.setString(1, qr_code);
+            statementUpdate.setInt(2, table_id);
+            statementUpdate.executeUpdate();
+
+            connection.commit();
+            return true;
         } catch (SQLException | IOException e) {
-            throw new RuntimeException(e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
         }
-        return false;
     }
 
     @Override
     public boolean updateTable(int id, String qr_code, String name) {
-        try (PreparedStatement statement = getStatement(UPDATE_TABLE)) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_TABLE)) {
             statement.setString(1, qr_code);
             statement.setString(2, name);
             statement.setInt(3, id);
             int result = statement.executeUpdate();
             return result > 0;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+           System.out.println(e.getMessage());
         }
+        return false;
     }
 
     @Override
     public boolean checkCanDelete(int id) {
-        try (PreparedStatement statement = getStatement(CHECK_CAN_DELETE)) {
+        try (PreparedStatement statement = connection.prepareStatement(CHECK_CAN_DELETE)) {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -135,31 +139,31 @@ public class TableDAOImplement implements ITableDAO {
                 return result == 0;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+           System.out.println(e.getMessage());
         }
         return false;
     }
 
     @Override
     public boolean deleteTable(int id) {
-        try (PreparedStatement statement = getStatement(DELETE_TABLE)) {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_TABLE)) {
             statement.setInt(1, id);
             int result = statement.executeUpdate();
             return result > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         return false;
     }
 
     @Override
     public boolean setInactive(int id) {
-        try (PreparedStatement statement = getStatement(SET_INACTIVE)) {
+        try (PreparedStatement statement = connection.prepareStatement(SET_INACTIVE)) {
             statement.setInt(1, id);
             int result = statement.executeUpdate();
             return result > 0;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         return false;
     }

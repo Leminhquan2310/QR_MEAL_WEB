@@ -24,4 +24,12 @@ public class CartItem {
     public double getTotal() {
         return product.getPrice() * quantity;
     }
+
+    @Override
+    public String toString() {
+        return "CartItem{" +
+                "product=" + product +
+                ", quantity=" + quantity +
+                '}';
+    }
 }

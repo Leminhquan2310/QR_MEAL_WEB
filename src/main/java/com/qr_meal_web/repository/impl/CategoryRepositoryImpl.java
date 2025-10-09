@@ -1,24 +1,31 @@
-package com.qr_meal_web.dao;
+package com.qr_meal_web.repository.impl;
 
 import com.qr_meal_web.enums.CategoryStatus;
 import com.qr_meal_web.model.Category;
+import com.qr_meal_web.repository.CategoryRepository;
 import com.qr_meal_web.util.DBConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryDAOImplement implements ICategoryDAO {
+public class CategoryRepositoryImpl implements CategoryRepository {
+    private Connection connection;
     private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category";
     private static final String INSERT_CATEGORY = "INSERT  INTO category (name, description, icon) values (?, ?, ?)";
     private static final String SELECT_CATEGORY = "SELECT * FROM category WHERE id = ?";
     private static final String UPDATE_CATEGORY = "UPDATE category SET name = ?, description = ?, icon = ? WHERE id = ?";
     private static final String DELETE_CATEGORY = "UPDATE category SET status = 0 WHERE id = ?";
+    private static final String FILTER_CATEGORY = "SELECT * FROM category WHERE 1=1";
+
+    public CategoryRepositoryImpl() {
+        connection = DBConnection.getConnection();
+    }
 
     @Override
     public List<Category> selectAllCategory() {
         List<Category> categories = new ArrayList<>();
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(SELECT_ALL_CATEGORY)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_CATEGORY)) {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -39,7 +46,7 @@ public class CategoryDAOImplement implements ICategoryDAO {
 
     @Override
     public boolean insertCategory(String name, String description, String icon) {
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(INSERT_CATEGORY)) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_CATEGORY)) {
             statement.setString(1, name);
             statement.setString(2, description);
             statement.setString(3, icon);
@@ -53,7 +60,7 @@ public class CategoryDAOImplement implements ICategoryDAO {
 
     @Override
     public Category selectCategory(int id) {
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(SELECT_CATEGORY)) {
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_CATEGORY)) {
             statement.setInt(1, id);
             ResultSet rs = statement.executeQuery();
             if (rs.next()) {
@@ -74,7 +81,7 @@ public class CategoryDAOImplement implements ICategoryDAO {
 
     @Override
     public boolean updateCategory(int id, String name, String desc, String icon) {
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(UPDATE_CATEGORY)) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_CATEGORY)) {
             statement.setString(1, name);
             statement.setString(2, desc);
             statement.setString(3, icon);
@@ -89,7 +96,7 @@ public class CategoryDAOImplement implements ICategoryDAO {
 
     @Override
     public boolean deleteCategory(int id) {
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(DELETE_CATEGORY)) {
+        try (PreparedStatement statement = connection.prepareStatement(DELETE_CATEGORY)) {
             statement.setInt(1, id);
             int rs = statement.executeUpdate();
             return rs > 0;
@@ -100,37 +107,10 @@ public class CategoryDAOImplement implements ICategoryDAO {
     }
 
     @Override
-    public List<Category> filterCategory(String keyword, int status, String createdFrom, String createdTo) {
+    public List<Category> filterCategory(String filterString, List<Object> params) {
         List<Category> categories = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM category WHERE 1=1");
-        List<Object> params = new ArrayList<>();
 
-        if (keyword != null && !keyword.isEmpty()) {
-            sql.append(" AND (name LIKE ? OR description LIKE ?)");
-            params.add("%" + keyword + "%");
-            params.add("%" + keyword + "%");
-        }
-
-        if (status != 2) {
-            sql.append(" AND status = ?");
-            params.add(status);
-        }
-
-        // Filter theo khoảng ngày
-        if (createdFrom != null && !createdFrom.isEmpty() && createdTo != null && !createdTo.isEmpty()) {
-            sql.append(" AND created_at BETWEEN ? AND ?");
-            params.add(Timestamp.valueOf(createdFrom + " 00:00:00"));
-            params.add(Timestamp.valueOf(createdTo + " 23:59:59"));
-        } else if (createdFrom != null && !createdFrom.isEmpty()) {
-            sql.append(" AND created_at >= ?");
-            params.add(Timestamp.valueOf(createdFrom + " 00:00:00"));
-        } else if (createdTo != null && !createdTo.isEmpty()) {
-            sql.append(" AND created_at <= ?");
-            params.add(Timestamp.valueOf(createdTo + " 23:59:59"));
-        }
-
-
-        try (Connection connection = DBConnection.getConnection(); PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+        try (PreparedStatement statement = connection.prepareStatement(FILTER_CATEGORY + filterString)) {
             for (int i = 0; i < params.size(); i++) {
                 statement.setObject(i + 1, params.get(i));
             }
