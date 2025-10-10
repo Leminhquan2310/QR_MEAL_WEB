@@ -1,4 +1,5 @@
-<%@ page import="com.qr_meal_web.repository.impl.Cart" %>
+<%@ page import="com.qr_meal_web.service.CartService" %>
+<%@ page import="com.qr_meal_web.service.impl.CartServiceImpl" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -83,9 +84,9 @@
 </div>
 
 <%
-    Cart cart = (Cart) request.getSession().getAttribute("cart");
+    CartService cart = (CartService) request.getSession().getAttribute("cart");
     if (cart == null) {
-        cart = new Cart();
+        cart = new CartServiceImpl();
         session.setAttribute("cart", cart);
     }
 %>

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CategoryServiceImpl implements CategoryService {
-    private CategoryRepository categoryRepository = new CategoryRepositoryImpl();
+    private final CategoryRepository categoryRepository = new CategoryRepositoryImpl();
 
     @Override
     public List<Category> selectAllCategory() {
