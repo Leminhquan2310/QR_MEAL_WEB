@@ -5,7 +5,7 @@ import com.qr_meal_web.model.Product;
 import java.util.List;
 
 public interface ProductRepository {
-    List<Product> selectAllProduct();
+    List<Product> selectAllProduct(int limit, int offset);
 
     boolean insertProduct(Product product);
 
@@ -20,4 +20,8 @@ public interface ProductRepository {
     List<Product> filterProduct(String filterString, List<Object> params);
 
     List<Product> selectProductForClient(String filterString, List<Object> params);
+
+    int countAll();
+
+    int countFilter(String filterString, List<Object> params);
 }

@@ -11,7 +11,8 @@ import java.util.List;
 
 public class CategoryRepositoryImpl implements CategoryRepository {
     private Connection connection;
-    private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category";
+    private static final String SELECT_LIST_CATEGORY = "SELECT * FROM category";
+    private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category LIMIT ? OFFSET ?";
     private static final String INSERT_CATEGORY = "INSERT  INTO category (name, description, icon) values (?, ?, ?)";
     private static final String SELECT_CATEGORY = "SELECT * FROM category WHERE id = ?";
     private static final String UPDATE_CATEGORY = "UPDATE category SET name = ?, description = ?, icon = ? WHERE id = ?";
@@ -22,10 +23,34 @@ public class CategoryRepositoryImpl implements CategoryRepository {
         connection = DBConnection.getConnection();
     }
 
+
     @Override
-    public List<Category> selectAllCategory() {
+    public List<Category> selectListCategory() {
+        List<Category> categories = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(SELECT_LIST_CATEGORY)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String desc = rs.getString("description");
+                String icon = rs.getString("icon");
+                int statusCode = rs.getInt("status");
+                CategoryStatus status = CategoryStatus.fromCode(statusCode);
+                Timestamp created_at = rs.getTimestamp("created_at");
+                categories.add(new Category(id, name, desc, icon, status, created_at));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+            return categories;
+    }
+
+    @Override
+    public List<Category> selectAllCategory(int limit, int offset) {
         List<Category> categories = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_CATEGORY)) {
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -43,6 +68,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             return null;
         }
     }
+
 
     @Override
     public boolean insertCategory(String name, String description, String icon) {
@@ -129,5 +155,34 @@ public class CategoryRepositoryImpl implements CategoryRepository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM category";
+        try (Connection conn = DBConnection.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public int countFilter(String filterString, List<Object> params) {
+        String sql = "SELECT COUNT(*) FROM category WHERE 1=1" + filterString;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement st = conn.prepareStatement(sql);) {
+            for (int i = 0; i < params.size(); i++) {
+                st.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
     }
 }

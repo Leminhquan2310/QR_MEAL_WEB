@@ -6,16 +6,13 @@ import com.qr_meal_web.model.Product;
 import com.qr_meal_web.repository.ProductRepository;
 import com.qr_meal_web.util.DBConnection;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ProductRepositoryImpl implements ProductRepository {
     private final Connection connection = DBConnection.getConnection();
-    private static final String SELECT_ALL_PRODUCT = "SELECT p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon FROM product p JOIN category c ON p.category_id = c.id";
+    private static final String SELECT_ALL_PRODUCT = "SELECT p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon FROM product p JOIN category c ON p.category_id = c.id LIMIT ? OFFSET ?";
     private static final String INSERT_PRODUCT = "INSERT INTO product (name, description, price, status, category_id, image, cooking_time) values (?, ?, ?, ?, ?, ?, ?)";
     private static final String SELECT_ONE_BY_ID = "SELECT p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon FROM product p JOIN category c ON p.category_id = c.id WHERE p.id = ?";
     private static final String UPDATE_PRODUCT = "UPDATE product SET name =?, description =?, price = ?, status = ?, category_id = ?, image = ?, cooking_time = ?  WHERE id = ?";
@@ -25,9 +22,11 @@ public class ProductRepositoryImpl implements ProductRepository {
     private static final String SELECT_PRODUCT_FOR_CLIENT = "SELECT p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon FROM product p JOIN category c ON p.category_id = c.id WHERE 1=1";
 
     @Override
-    public List<Product> selectAllProduct() {
+    public List<Product> selectAllProduct(int limit, int offset) {
         List<Product> products = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_PRODUCT)) {
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -192,4 +191,32 @@ public class ProductRepositoryImpl implements ProductRepository {
         return false;
     }
 
+    @Override
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM product";
+        try (Connection conn = DBConnection.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public int countFilter(String filterString, List<Object> params) {
+        String sql = "SELECT COUNT(*) FROM product p WHERE 1=1" + filterString;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement st = conn.prepareStatement(sql);) {
+            for (int i = 0; i < params.size(); i++) {
+                st.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
 }

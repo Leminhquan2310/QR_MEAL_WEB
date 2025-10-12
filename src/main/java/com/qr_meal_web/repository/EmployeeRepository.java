@@ -5,7 +5,7 @@ import com.qr_meal_web.model.Employee;
 import java.util.List;
 
 public interface EmployeeRepository {
-    List<Employee> selectAllEmp();
+    List<Employee> selectAllEmp(int limit, int offset);
 
     boolean insertEmp(String name, int role, String phone, String passwordHashed);
 
@@ -24,4 +24,8 @@ public interface EmployeeRepository {
     List<Employee> filtersEmployee(String filterString, List<Object> params);
 
     boolean checkCanDelete(int id);
+
+    int countAll();
+
+    int countFilter(String filterString, List<Object> params);
 }

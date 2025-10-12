@@ -1,8 +1,10 @@
 package com.qr_meal_web.controller;
 
 import com.qr_meal_web.enums.OrderStatus;
+import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Order;
 import com.qr_meal_web.model.OrderDetail;
+import com.qr_meal_web.model.OrderStatusLog;
 import com.qr_meal_web.service.CartService;
 import com.qr_meal_web.service.OrderService;
 import com.qr_meal_web.service.impl.OrderServiceImpl;
@@ -15,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +60,8 @@ public class OrderServlet extends HttpServlet {
             case "create":
                 handleCreateOrder(request, response);
                 break;
-            case "update":
-                handleUpdateOrder(request, response);
+            case "update-status":
+                handleChangeOrderStatus(request, response);
                 break;
             case "delete":
                 handleDeleteOrder(request, response);
@@ -154,6 +157,28 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("statuses", statuses);
     }
 
+    private void getOrderStatusLogs(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String orderIdStr = request.getParameter("orderId");
+        if (orderIdStr == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "orderId required");
+            return;
+        }
+
+        try {
+            int orderId = Integer.parseInt(orderIdStr);
+            List<OrderStatusLog> logs = orderService.getOrderStatusLogs(orderId);
+
+            // Convert to JSON (tùy lib: Gson / Jackson). Ví dụ dùng Gson:
+            response.setContentType("application/json;charset=UTF-8");
+            String json = new com.google.gson.GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                    .create()
+                    .toJson(logs);
+            response.getWriter().print(json);
+        } catch (Exception e) {
+            response.sendError(500, e.getMessage());
+        }
+    }
 
     //  --------------- do post --------------------
 
@@ -198,11 +223,13 @@ public class OrderServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/order");
     }
 
-    private void handleUpdateOrder(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleChangeOrderStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         int status = Integer.parseInt(request.getParameter("status"));
-        boolean isUpdated = orderService.updateOrder(id, status);
+        String note = request.getParameter("note");
         HttpSession session = request.getSession();
+        Employee account = (Employee) session.getAttribute("account");
+        boolean isUpdated = orderService.changeOrderStatus(id, status, account, note);
         if (isUpdated) {
             session.setAttribute("message", "Cập nhật thành công!");
             session.setAttribute("status", "success");
@@ -213,4 +240,6 @@ public class OrderServlet extends HttpServlet {
 
         response.sendRedirect(request.getContextPath() + "/order");
     }
+
+
 }

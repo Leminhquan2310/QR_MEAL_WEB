@@ -5,7 +5,9 @@ import com.qr_meal_web.model.Category;
 import java.util.List;
 
 public interface CategoryRepository {
-    List<Category> selectAllCategory();
+    List<Category> selectListCategory();
+
+    List<Category> selectAllCategory(int limit, int offset);
 
     boolean insertCategory(String name, String description, String icon);
 
@@ -16,4 +18,8 @@ public interface CategoryRepository {
     boolean deleteCategory(int id);
 
     List<Category> filterCategory(String filterString, List<Object> params);
+
+    int countAll();
+
+    int countFilter(String filterString, List<Object> params);
 }

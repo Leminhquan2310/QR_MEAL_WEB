@@ -55,12 +55,12 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="dashboard.jsp" class="${pageActive == 'dashboard' ? 'active' : ''}">📊 Dashboard</a>
-        <a href="employee" class="${pageActive == 'employee' ? 'active' : ''}">👤 Quản lý nhân viên</a>
-        <a href="table" class="${pageActive == 'table' ? 'active' : ''}">🪟 Quản lý bàn</a>
-        <a href="product" class="${pageActive == 'product' ? 'active' : ''}">🍜 Sản phẩm</a>
-        <a href="category" class="${pageActive == 'category' ? 'active' : ''}">🥗 Phân loại sản phẩm</a>
-        <a href="menu.jsp" class="${pageActive == 'menu' ? 'active' : ''}">📋 Menu</a>
-        <a href="order" class="${pageActive == 'order' ? 'active' : ''}">🧾 Đơn hàng</a>
+        <a href="employee?page=1" class="${pageActive == 'employee' ? 'active' : ''}">👤 Quản lý nhân viên</a>
+        <a href="table?page=1" class="${pageActive == 'table' ? 'active' : ''}">🪟 Quản lý bàn</a>
+        <a href="product?page=1" class="${pageActive == 'product' ? 'active' : ''}">🍜 Sản phẩm</a>
+        <a href="category?page=1" class="${pageActive == 'category' ? 'active' : ''}">🥗 Phân loại sản phẩm</a>
+        <a href="menu.jsp?page=1" class="${pageActive == 'menu' ? 'active' : ''}">📋 Menu</a>
+        <a href="order?page=1" class="${pageActive == 'order' ? 'active' : ''}">🧾 Đơn hàng</a>
         <a href="settings.jsp" class="${pageActive == 'settings' ? 'active' : ''}">⚙️ Cấu hình</a>
     </div>
 

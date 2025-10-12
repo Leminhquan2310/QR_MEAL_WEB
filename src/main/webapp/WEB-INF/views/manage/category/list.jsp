@@ -11,30 +11,31 @@
         <div class="card-body">
             <form action="/category" method="get" class="row g-3 align-items-end">
                 <input type="hidden" name="action" value="filters">
+                <input type="hidden" name="page" value="1">
                 <div class="col-md-3">
                     <label for="keyword" class="form-label fw-semibold">Tên loại</label>
-                    <input type="text" class="form-control custom-input" value="${keyword}" id="keyword" name="keyword"
+                    <input type="text" class="form-control custom-input" value="${filters.keyword}" id="keyword" name="keyword"
                            placeholder="Nhập tên hoặc mô tả...">
                 </div>
 
                 <div class="col-md-3">
                     <label for="status" class="form-label fw-semibold">Trạng thái</label>
                     <select id="status" name="status" class="form-select custom-input">
-                        <option value="2" }>-- Tất cả --</option>
-                        <option value="1" ${status == 1 ? "selected" : ""}>Hoạt động</option>
-                        <option value="0" ${status == 0 ? "selected" : ""}>Ngừng hoạt động</option>
+                        <option value="-1" ${filters.status == -1 ? "selected" : ""}>-- Tất cả --</option>
+                        <option value="1" ${filters.status == 1 ? "selected" : ""}>Hoạt động</option>
+                        <option value="0" ${filters.status == 0 ? "selected" : ""}>Ngừng hoạt động</option>
                     </select>
                 </div>
 
                 <div class="col-md-3">
                     <label for="createdFrom" class="form-label fw-semibold">Từ ngày</label>
-                    <input type="date" class="form-control custom-input" value="${createdFrom}" id="createdFrom"
+                    <input type="date" class="form-control custom-input" value="${filters.createdFrom}" id="createdFrom"
                            name="createdFrom">
                 </div>
 
                 <div class="col-md-3">
                     <label for="createdTo" class="form-label fw-semibold">Đến ngày</label>
-                    <input type="date" class="form-control custom-input" value="${createdTo}" id="createdTo"
+                    <input type="date" class="form-control custom-input" value="${filters.createdTo}" id="createdTo"
                            name="createdTo">
                 </div>
 
@@ -42,7 +43,7 @@
                     <button type="submit" class="btn btn-info d-flex align-items-center shadow-sm">
                         <i class="fa-solid fa-filter"></i> Lọc
                     </button>
-                    <a href="/category" class="btn btn-secondary d-flex align-items-center px-3 shadow-sm">
+                    <a href="/category?page=1" class="btn btn-secondary d-flex align-items-center px-3 shadow-sm">
                         <i class="fa-solid fa-trash"></i> Reset
                     </a>
                 </div>
@@ -87,6 +88,50 @@
                 </c:forEach>
                 </tbody>
             </table>
+
+            <!-- PHÂN TRANG -->
+            <c:if test="${not empty filters}">
+                <c:set var="context"
+                       value="&action=filters&keyword=${filters.keyword}&status=${filters.status}&createdFrom=${filters.createdFrom}&createdTo=${filters.createdTo}"/>
+            </c:if>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <%--     Nút Trang Trước -->--%>
+                    <c:if test="${currentPage > 1}">
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${currentPage - 1}${context}">«</a>
+                        </li>
+                    </c:if>
+
+                    <%--     Nếu không ở đầu danh sách -->--%>
+                    <c:if test="${startPage > 1}">
+                        <li class="page-item"><a class="page-link" href="?page=1${context}">1</a></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    </c:if>
+
+                    <%--     Các trang trong phạm vi -->--%>
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" href="?page=${i}${context}">${i}</a>
+                        </li>
+                    </c:forEach>
+
+                    <%--     Nếu không ở cuối danh sách --%>
+                    <c:if test="${endPage < totalPages}">
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${totalPages}${context}">${totalPages}</a>
+                        </li>
+                    </c:if>
+
+                    <%--     Nút Trang Sau --%>
+                    <c:if test="${currentPage < totalPages}">
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${currentPage + 1}${context}">»</a>
+                        </li>
+                    </c:if>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

@@ -5,7 +5,7 @@ import com.qr_meal_web.model.Employee;
 import java.util.List;
 
 public interface EmployeeService {
-    List<Employee> selectAllEmp();
+    List<Employee> selectAllEmp(int limit, int page);
 
     boolean insertEmp(String name, int role, String phone, String password);
 
@@ -19,7 +19,11 @@ public interface EmployeeService {
 
     Employee checkLogin(String phone, String password);
 
-    List<Employee> filtersEmployee(String name, int role, String createdFrom, String createdTo);
+    List<Employee> filtersEmployee(String name, int role, String createdFrom, String createdTo, int limit, int page);
 
     boolean checkCanDelete(int id);
+
+    int getTotalEmployees();
+
+    int getTotalEmployeeFilter(String name, int role, String createdFrom, String createdTo);
 }

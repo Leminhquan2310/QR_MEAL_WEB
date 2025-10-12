@@ -37,7 +37,7 @@
                 <!-- Buttons -->
                 <div class="col-12 d-flex justify-content-end mt-3">
                     <button type="submit" class="btn btn-success me-2">💾 Lưu</button>
-                    <a href="/employee" class="btn btn-secondary">↩ Hủy</a>
+                    <a href="/employee?page=1" class="btn btn-secondary">↩ Hủy</a>
                 </div>
             </form>
         </div>

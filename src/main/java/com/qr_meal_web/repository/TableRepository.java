@@ -5,7 +5,7 @@ import com.qr_meal_web.model.Table;
 import java.util.List;
 
 public interface TableRepository {
-    List<Table> selectAllTable();
+    List<Table> selectAllTable(int limit, int offset);
 
     List<Table> filtersTable(String filterString, List<Object> params);
 
@@ -18,4 +18,8 @@ public interface TableRepository {
     boolean deleteTable(int id);
 
     boolean setInactive(int id);
+
+    int countAll();
+
+    int countFilter(String filterString, List<Object> params);
 }

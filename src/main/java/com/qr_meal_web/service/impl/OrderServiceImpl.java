@@ -1,18 +1,25 @@
 package com.qr_meal_web.service.impl;
 
+import com.qr_meal_web.enums.OrderStatus;
+import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Order;
 import com.qr_meal_web.model.OrderDetail;
+import com.qr_meal_web.model.OrderStatusLog;
 import com.qr_meal_web.repository.OrderRepository;
+import com.qr_meal_web.repository.OrderStatusLogRepository;
 import com.qr_meal_web.repository.impl.OrderRepositoryImpl;
+import com.qr_meal_web.repository.impl.OrderStatusLogRepositoryImpl;
 import com.qr_meal_web.service.CartService;
 import com.qr_meal_web.service.OrderService;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository = new OrderRepositoryImpl();
+    private final OrderStatusLogRepository orderStatusLogRepository = new OrderStatusLogRepositoryImpl();
 
     @Override
     public boolean insertOrder(int table_id, CartService cart) {
@@ -35,10 +42,6 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.selectOrderDetailByOrderId(id);
     }
 
-    @Override
-    public boolean updateOrder(int id, int status) {
-        return orderRepository.updateOrder(id, status);
-    }
 
     @Override
     public boolean deleteOrder(int id) {
@@ -117,6 +120,49 @@ public class OrderServiceImpl implements OrderService {
             params.add(Timestamp.valueOf(createdTo + " 23:59:59"));
         }
         return orderRepository.countFilter(sql.toString(), params);
+    }
+
+    @Override
+    public boolean changeOrderStatus(int orderId,  int newStatus, Employee changedBy, String note) {
+        // 1. Lấy order hiện tại
+        Order order = orderRepository.selectOrderById(orderId);
+        if (order == null) throw new IllegalArgumentException("Order not found: " + orderId);
+
+        OrderStatus oldStatus = order.getStatus();
+        if (oldStatus != null && oldStatus.equals(newStatus)) ;
+        else order.setStatus(OrderStatus.fromCode(newStatus));
+
+
+        boolean resultO = false;
+        try {
+            resultO = orderRepository.changOrderStatus(order);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 3. Lưu log thay đổi
+        OrderStatusLog log = new OrderStatusLog();
+        log.setOrderId(orderId);
+        log.setOld_status(oldStatus);
+        log.setNew_status(OrderStatus.fromCode(newStatus));
+        log.setChanged_by(changedBy);
+        log.setNote(note);
+        boolean resultOS = false;
+        try {
+            resultOS = orderStatusLogRepository.save(log);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return resultO & resultOS;
+    }
+
+    @Override
+    public List<OrderStatusLog> getOrderStatusLogs(int orderId) {
+        try {
+            return orderStatusLogRepository.findByOrderId(orderId);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

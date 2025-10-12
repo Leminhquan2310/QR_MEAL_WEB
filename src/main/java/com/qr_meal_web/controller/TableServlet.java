@@ -1,5 +1,6 @@
 package com.qr_meal_web.controller;
 
+import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Table;
 import com.qr_meal_web.service.TableService;
 import com.qr_meal_web.service.impl.TableServiceImpl;
@@ -19,6 +20,9 @@ import java.util.Map;
 @WebServlet(name = "TableServlet", urlPatterns = "/table")
 public class TableServlet extends HttpServlet {
     private final TableService tableService = new TableServiceImpl();
+    private int page = 1;
+    private int limit = 10;
+    private int visiblePages = 5;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -59,24 +63,58 @@ public class TableServlet extends HttpServlet {
     }
 
     private void showAllTable(HttpServletRequest request, HttpServletResponse response) {
-        List<Table> tables = tableService.selectAllTable();
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+        List<Table> tables = tableService.selectAllTable(limit, page);
+        int totalTable = tableService.getCountTotal();
+        int totalPages = (int) Math.ceil((double) totalTable / limit);
+
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         request.setAttribute("pageTitle", "Quản lý bàn");
         request.setAttribute("pageContent", "../table/list.jsp");
         request.setAttribute("tables", tables);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     private void showFiltersTable(HttpServletRequest request, HttpServletResponse response) {
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
         String createdFrom = request.getParameter("createdFrom");
         String createdTo = request.getParameter("createdTo");
+        int totalTable = tableService.getCountTotalTableFilter(createdFrom, createdTo);
+        int totalPages = (int) Math.ceil((double) totalTable / limit);
+
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         Map<String, Object> filters = new HashMap<>();
         filters.put("createdFrom", createdFrom);
         filters.put("createdTo", createdTo);
 
-        List<Table> tables = tableService.filtersTable(createdFrom, createdTo);
+        List<Table> tables = tableService.filtersTable(createdFrom, createdTo, limit, page);
         request.setAttribute("pageTitle", "Quản lý bàn");
         request.setAttribute("pageContent", "../table/list.jsp");
         request.setAttribute("tables", tables);
         request.setAttribute("filters", filters);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     private void getRefreshQRCode(HttpServletRequest request, HttpServletResponse response) throws IOException {

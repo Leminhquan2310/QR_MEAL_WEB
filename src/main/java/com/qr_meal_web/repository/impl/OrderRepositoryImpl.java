@@ -18,7 +18,7 @@ public class OrderRepositoryImpl implements OrderRepository {
     private static final String INSERT_ORDER_DETAIL = "INSERT INTO orderdetail (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
     private static final String SELECT_ALL_ORDER = "SELECT * FROM `order` ORDER BY created_at DESC LIMIT ? OFFSET ?";
     private static final String SELECT_ORDER_BY_ID = "SELECT * FROM `order` WHERE id = ?";
-    private static final String UPDATE_ORDER = "UPDATE `order` SET status = ? WHERE id = ?";
+    private static final String UPDATE_ORDER_STATUS = "UPDATE `order` SET status = ? WHERE id = ?";
     private static final String SELECT_ORDER_DETAIL_BY_ORDER_ID =
             "SELECT od.order_id, od.quantity, od.price as unit_price, p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon " +
                     "FROM orderdetail od " +
@@ -155,13 +155,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public boolean updateOrder(int id, int status) {
+    public boolean changOrderStatus(Order order) throws SQLException {
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_ORDER)) {
-            statement.setInt(1, status);
-            statement.setInt(2, id);
-            int result = statement.executeUpdate();
-            return result > 0;
+             PreparedStatement statement = connection.prepareStatement(UPDATE_ORDER_STATUS)) {
+            statement.setInt(1, order.getStatus().getCode());
+            statement.setInt(2, order.getId());
+            statement.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

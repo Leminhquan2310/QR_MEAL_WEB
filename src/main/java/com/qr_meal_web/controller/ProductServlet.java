@@ -26,8 +26,11 @@ import java.util.*;
 @WebServlet(name = "ProductServlet", urlPatterns = "/product")
 public class ProductServlet extends HttpServlet {
     private final ProductService productService = new ProductServiceImpl();
-    private final List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
+    private final List<Category> categories = new CategoryRepositoryImpl().selectListCategory();
     private final List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
+    private int page = 1;
+    private int limit = 10;
+    private int visiblePages = 5;
 
 
     @Override
@@ -71,18 +74,35 @@ public class ProductServlet extends HttpServlet {
     }
 
     private void showAllProduct(HttpServletRequest request, HttpServletResponse response) {
-        List<Product> products = productService.selectAllProduct();
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+        List<Product> products = productService.selectAllProduct(limit, page);
+        int totalProduct = productService.getCountTotal();
+        int totalPages = (int) Math.ceil((double) totalProduct / limit);
+
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         request.setAttribute("pageTitle", "Quản lý sản phẩm");
         request.setAttribute("pageContent", "../product/list.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
         request.setAttribute("statuses", statuses);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     private void showCreateProduct(HttpServletRequest request, HttpServletResponse response) {
         List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
-        List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
+        List<Category> categories = new CategoryRepositoryImpl().selectListCategory();
         request.setAttribute("pageTitle", "Thêm mới sản phẩm");
         request.setAttribute("pageContent", "../product/create.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
@@ -93,7 +113,7 @@ public class ProductServlet extends HttpServlet {
     private void showUpdateProduct(HttpServletRequest request, HttpServletResponse response) {
         int id = Integer.parseInt(request.getParameter("id"));
         List<ProductStatus> statuses = Arrays.asList(ProductStatus.values());
-        List<Category> categories = new CategoryRepositoryImpl().selectAllCategory();
+        List<Category> categories = new CategoryRepositoryImpl().selectListCategory();
         Product product = productService.selectById(id);
         request.setAttribute("pageTitle", "Chỉnh sửa sản phẩm");
         request.setAttribute("pageContent", "../product/update.jsp");
@@ -105,11 +125,24 @@ public class ProductServlet extends HttpServlet {
     }
 
     private void showFilterProduct(HttpServletRequest request, HttpServletResponse response) {
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
         String keyword = request.getParameter("keyword");
         double minPrice = Helper.parseDoubleSafe(request.getParameter("minPrice"), 0);
         double maxPrice = Helper.parseDoubleSafe(request.getParameter("maxPrice"), 0);
         int category = Integer.parseInt(request.getParameter("category"));
         int status = Integer.parseInt(request.getParameter("status"));
+        int totalProduct = productService.getCountTotalProductFilter(keyword, minPrice, maxPrice, category, status);
+        int totalPages = (int) Math.ceil((double) totalProduct / limit);
+
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         Map<String, Object> filters = new HashMap<>();
         filters.put("keyword", keyword);
         filters.put("minPrice", minPrice);
@@ -117,7 +150,7 @@ public class ProductServlet extends HttpServlet {
         filters.put("category", category);
         filters.put("status", status);
 
-        List<Product> products = productService.filterProduct(keyword, minPrice, maxPrice, category, status);
+        List<Product> products = productService.filterProduct(keyword, minPrice, maxPrice, category, status, limit, page);
         request.setAttribute("pageTitle", "Quản lý sản phẩm");
         request.setAttribute("pageContent", "../product/list.jsp");
         request.setAttribute("pageJs", "/resources/js/product.js");
@@ -125,6 +158,10 @@ public class ProductServlet extends HttpServlet {
         request.setAttribute("categories", categories);
         request.setAttribute("statuses", statuses);
         request.setAttribute("filters", filters);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     // ----------- do post --------------

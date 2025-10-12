@@ -13,7 +13,7 @@ import java.util.List;
 
 public class TableRepositoryImpl implements TableRepository {
     private final Connection connection = DBConnection.getConnection();
-    private static final String SELECT_ALL_TABLE = "SELECT * FROM `table`";
+    private static final String SELECT_ALL_TABLE = "SELECT * FROM `table` LIMIT ? OFFSET ?";
     private static final String FILTER_TABLE = "SELECT * FROM `table` WHERE 1=1";
     private static final String INSERT_TABLE = "INSERT INTO `table` (name) values (?)";
     private static final String UPDATE_TABLE = "UPDATE `table` SET qr_code = ?, name = ? WHERE id = ?";
@@ -23,9 +23,11 @@ public class TableRepositoryImpl implements TableRepository {
     private static final String SET_INACTIVE = "UPDATE `table` SET status = 0 WHERE id = ?";
 
     @Override
-    public List<Table> selectAllTable() {
+    public List<Table> selectAllTable(int limit, int offset) {
         List<Table> tables = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL_TABLE)) {
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -166,5 +168,34 @@ public class TableRepositoryImpl implements TableRepository {
             System.out.println(e.getMessage());
         }
         return false;
+    }
+
+    @Override
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM `table`";
+        try (Connection conn = DBConnection.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public int countFilter(String filterString, List<Object> params) {
+        String sql = "SELECT COUNT(*) FROM `table` WHERE 1=1" + filterString;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement st = conn.prepareStatement(sql);) {
+            for (int i = 0; i < params.size(); i++) {
+                st.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
     }
 }

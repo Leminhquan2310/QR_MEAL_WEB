@@ -51,7 +51,7 @@
                 <!-- Buttons -->
                 <div class="col-12 d-flex justify-content-end mt-3">
                     <button type="submit" class="btn btn-primary me-2">💾 Cập nhật</button>
-                    <a href="${pageContext.request.contextPath}/employee" class="btn btn-secondary">↩ Hủy</a>
+                    <a href="${pageContext.request.contextPath}/employee?page=1" class="btn btn-secondary">↩ Hủy</a>
                 </div>
 
             </form>

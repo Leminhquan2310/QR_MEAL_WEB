@@ -4,6 +4,7 @@ import com.qr_meal_web.model.Order;
 import com.qr_meal_web.model.OrderDetail;
 import com.qr_meal_web.service.CartService;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public interface OrderRepository {
@@ -15,9 +16,9 @@ public interface OrderRepository {
 
     List<OrderDetail> selectOrderDetailByOrderId(int id);
 
-    boolean updateOrder(int id, int status);
-
     boolean deleteOrder(int id);
+
+    boolean changOrderStatus(Order order) throws SQLException;
 
     boolean isReferenced(int id);
 

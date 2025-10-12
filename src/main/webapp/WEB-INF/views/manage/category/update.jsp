@@ -29,7 +29,7 @@
             </div>
             <div class="col-md-12 d-flex justify-content-end">
                 <button type="submit" class="btn btn-success me-2">💾 Lưu</button>
-                <a href="/category" class="btn btn-secondary">↩ Hủy</a>
+                <a href="/category?page=1" class="btn btn-secondary">↩ Hủy</a>
             </div>
         </form>
     </div>

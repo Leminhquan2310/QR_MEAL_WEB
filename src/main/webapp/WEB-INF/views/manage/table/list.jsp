@@ -12,6 +12,7 @@
         <div class="card-body p-3"> <!-- giảm padding -->
             <form method="get" action="/table" class="row g-3 align-items-end">
                 <input type="hidden" name="action" value="filters">
+                <input type="hidden" name="page" value="1">
 
                 <div class="col-md-3">
                     <label for="createdFrom" class="form-label fw-semibold">Từ ngày</label>
@@ -32,7 +33,7 @@
                     <button type="submit" class="btn btn-info d-flex align-items-center shadow-sm">
                         <i class="fa-solid fa-filter me-2"></i> Lọc
                     </button>
-                    <a href="/table" class="btn btn-secondary d-flex align-items-center shadow-sm">
+                    <a href="/table?page=1" class="btn btn-secondary d-flex align-items-center shadow-sm">
                         <i class="fa-solid fa-trash me-2"></i> Reset
                     </a>
                 </div>
@@ -44,7 +45,7 @@
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <h5 class="card-title mb-3">📋 Danh sách bàn</h5>
-            <table class="table table-bordered table-hover text-center mb-0" id="tableList">
+            <table class="table table-bordered table-hover text-center" id="tableList">
                 <thead class="table-primary">
                 <tr>
                     <th scope="col">Mã</th>
@@ -75,6 +76,50 @@
                 </c:forEach>
                 </tbody>
             </table>
+
+            <!-- PHÂN TRANG -->
+            <c:if test="${not empty filters}">
+                <c:set var="context"
+                       value="&action=filters&createdFrom=${filters.createdFrom}&createdTo=${filters.createdTo}"/>
+            </c:if>
+            <nav>
+                <ul class="pagination justify-content-center">
+                    <!-- Nút Trang Trước -->
+                    <c:if test="${currentPage > 1}">
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${currentPage - 1}${context}">«</a>
+                        </li>
+                    </c:if>
+
+                    <!-- Nếu không ở đầu danh sách -->
+                    <c:if test="${startPage > 1}">
+                        <li class="page-item"><a class="page-link" href="?page=1${context}">1</a></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    </c:if>
+
+                    <!--     Các trang trong phạm vi -->
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <li class="page-item ${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" href="?page=${i}${context}">${i}</a>
+                        </li>
+                    </c:forEach>
+
+                    <!--     Nếu không ở cuối danh sách -->
+                    <c:if test="${endPage < totalPages}">
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${totalPages}${context}">${totalPages}</a>
+                        </li>
+                    </c:if>
+
+                    <!--     Nút Trang Sau -->
+                    <c:if test="${currentPage < totalPages}">
+                        <li class="page-item">
+                            <a class="page-link" href="?page=${currentPage + 1}${context}">»</a>
+                        </li>
+                    </c:if>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

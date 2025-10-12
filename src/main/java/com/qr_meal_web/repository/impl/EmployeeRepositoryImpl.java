@@ -12,7 +12,7 @@ import java.util.List;
 
 public class EmployeeRepositoryImpl implements EmployeeRepository {
     private Connection connection;
-    private static final String SELECT_ALL = "SELECT e.*, r.name as role_name, r.color as role_color FROM employee e JOIN role r ON e.role_id = r.id";
+    private static final String SELECT_ALL = "SELECT e.*, r.name as role_name, r.color as role_color FROM employee e JOIN role r ON e.role_id = r.id LIMIT ? OFFSET ?";
     private static final String INSERT_EMPLOYEE = "INSERT INTO employee (name, role_id, phone, password_hash) values (?, ?, ?, ?)";
     private static final String SELECT_ONE_BY_ID = "SELECT e.*, r.name as role_name, r.color as role_color FROM employee e JOIN role r ON e.role_id = r.id WHERE e.id = ?";
     private static final String UPDATE_EMPLOYEE = "UPDATE employee SET name = ?, role_id = ?, phone = ?, password_hash = ? WHERE id = ?";
@@ -28,9 +28,11 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
     }
 
     @Override
-    public List<Employee> selectAllEmp() {
+    public List<Employee> selectAllEmp(int limit, int offset) {
         List<Employee> emps = new ArrayList<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_ALL)) {
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
                 int id = rs.getInt("id");
@@ -203,5 +205,34 @@ public class EmployeeRepositoryImpl implements EmployeeRepository {
             System.out.println(e.getMessage());
         }
         return false;
+    }
+
+    @Override
+    public int countAll() {
+        String sql = "SELECT COUNT(*) FROM employee";
+        try (Connection conn = DBConnection.getConnection();
+             Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public int countFilter(String filterString, List<Object> params) {
+        String sql = "SELECT COUNT(*) FROM employee e WHERE 1=1" + filterString;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement st = conn.prepareStatement(sql);) {
+            for (int i = 0; i < params.size(); i++) {
+                st.setObject(i + 1, params.get(i));
+            }
+            ResultSet rs = st.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return 0;
     }
 }

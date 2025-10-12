@@ -57,7 +57,7 @@ public class ClientServlet extends HttpServlet {
 
         int category = Helper.parseIntegerSafe(request.getParameter("category"), -1);
         List<Product> products = productService.selectProductForClient(category);
-        List<Category> categories = categoryService.selectAllCategory();
+        List<Category> categories = categoryService.selectListCategory();
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
 

@@ -1,6 +1,7 @@
 package com.qr_meal_web.controller;
 
 import com.qr_meal_web.model.Employee;
+import com.qr_meal_web.model.Order;
 import com.qr_meal_web.model.Role;
 import com.qr_meal_web.service.EmployeeService;
 import com.qr_meal_web.service.impl.EmployeeServiceImpl;
@@ -21,6 +22,9 @@ import java.util.Map;
 public class EmployeeServlet extends HttpServlet {
     private final EmployeeService employeeService = new EmployeeServiceImpl();
     private final List<Role> roles = new RoleServiceImpl().selectAllRole();
+    private int page = 1;
+    private int limit = 10;
+    private int visiblePages = 5;
 
 
     @Override
@@ -64,13 +68,30 @@ public class EmployeeServlet extends HttpServlet {
     }
 
     private void showListEmp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Employee> employees = employeeService.selectAllEmp();
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
+        List<Employee> employees = employeeService.selectAllEmp(limit, page);
+        int totalOrders = employeeService.getTotalEmployees();
+        int totalPages = (int) Math.ceil((double) totalOrders / limit);
+
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         request.setAttribute("pageTitle", "Quản lý nhân viên");
         request.setAttribute("pageContent", "../employee/list.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
         request.setAttribute("pageJs", "/resources/js/employee.js");
         request.setAttribute("employees", employees);
         request.setAttribute("roles", roles);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     private void showFormCreateEmp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -93,18 +114,30 @@ public class EmployeeServlet extends HttpServlet {
     }
 
     private void showFilterEmployee(HttpServletRequest request, HttpServletResponse response) {
+        if (request.getParameter("page") != null) {
+            page = Integer.parseInt(request.getParameter("page"));
+        }
         String name = request.getParameter("name");
         int role = Integer.parseInt(request.getParameter("role"));
         String createdFrom = request.getParameter("createdFrom");
         String createdTo = request.getParameter("createdTo");
+        int totalOrders = employeeService.getTotalEmployeeFilter(name, role, createdFrom, createdTo);
+        int totalPages = (int) Math.ceil((double) totalOrders / limit);
 
+        int startPage = Math.max(1, page - visiblePages / 2);
+        int endPage = Math.min(totalPages, startPage + visiblePages - 1);
+
+        // Cập nhật lại nếu gần cuối danh sách
+        if (endPage - startPage < visiblePages - 1) {
+            startPage = Math.max(1, endPage - visiblePages + 1);
+        }
         Map<String, Object> filters = new HashMap<>();
         filters.put("name", name);
         filters.put("role", role);
         filters.put("createdFrom", createdFrom);
         filters.put("createdTo", createdTo);
 
-        List<Employee> employees = employeeService.filtersEmployee(name, role, createdFrom, createdTo);
+        List<Employee> employees = employeeService.filtersEmployee(name, role, createdFrom, createdTo, limit, page);
         request.setAttribute("pageTitle", "Quản lý nhân viên");
         request.setAttribute("pageContent", "../employee/list.jsp");
         request.setAttribute("pageCss", "/resources/css/employee.css");
@@ -112,6 +145,10 @@ public class EmployeeServlet extends HttpServlet {
         request.setAttribute("employees", employees);
         request.setAttribute("roles", roles);
         request.setAttribute("filters", filters);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("startPage", startPage);
+        request.setAttribute("endPage", endPage);
     }
 
     //    post .....
