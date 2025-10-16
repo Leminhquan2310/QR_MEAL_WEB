@@ -123,7 +123,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean changeOrderStatus(int orderId,  int newStatus, Employee changedBy, String note) {
+    public boolean changeOrderStatus(int orderId, int newStatus, Employee changedBy, String note) {
         // 1. Lấy order hiện tại
         Order order = orderRepository.selectOrderById(orderId);
         if (order == null) throw new IllegalArgumentException("Order not found: " + orderId);
@@ -164,6 +164,5 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException(e);
         }
     }
-
 
 }

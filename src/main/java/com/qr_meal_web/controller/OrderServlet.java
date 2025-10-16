@@ -1,12 +1,13 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.GsonBuilder;
 import com.qr_meal_web.enums.OrderStatus;
-import com.qr_meal_web.model.Employee;
-import com.qr_meal_web.model.Order;
-import com.qr_meal_web.model.OrderDetail;
-import com.qr_meal_web.model.OrderStatusLog;
+import com.qr_meal_web.model.*;
 import com.qr_meal_web.service.CartService;
+import com.qr_meal_web.service.InvoiceService;
 import com.qr_meal_web.service.OrderService;
+import com.qr_meal_web.service.impl.BankAccountServiceImpl;
+import com.qr_meal_web.service.impl.InvoiceServiceImpl;
 import com.qr_meal_web.service.impl.OrderServiceImpl;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
@@ -44,12 +45,16 @@ public class OrderServlet extends HttpServlet {
             case "filters":
                 showFiltersOrder(request, response);
                 break;
+            case "getCookingTicket":
+                getOrderDetail(request, response);
+                return;
+            case "get-payment-info":
+                getBankAccountInfo(request, response);
+                return;
             default:
                 showAllOrder(request, response);
                 break;
         }
-
-        request.getRequestDispatcher("/WEB-INF/views/manage/layout/layout.jsp").forward(request, response);
     }
 
     @Override
@@ -66,13 +71,16 @@ public class OrderServlet extends HttpServlet {
             case "delete":
                 handleDeleteOrder(request, response);
                 break;
+            case "completed-order":
+                handleCompleteOrder(request, response);
+                break;
             default:
                 break;
         }
     }
 
 
-    private void showAllOrder(HttpServletRequest request, HttpServletResponse response) {
+    private void showAllOrder(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         if (request.getParameter("page") != null) {
             page = Integer.parseInt(request.getParameter("page"));
         }
@@ -99,9 +107,10 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("startPage", startPage);
         request.setAttribute("endPage", endPage);
         request.setAttribute("statuses", statuses);
+        request.getRequestDispatcher("/WEB-INF/views/manage/layout/layout.jsp").forward(request, response);
     }
 
-    private void showFiltersOrder(HttpServletRequest request, HttpServletResponse response) {
+    private void showFiltersOrder(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int code = Helper.parseIntegerSafe(request.getParameter("code"), 0);
         int status = Integer.parseInt(request.getParameter("status"));
         String createdFrom = request.getParameter("createdFrom");
@@ -137,9 +146,10 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("endPage", endPage);
         request.setAttribute("filters", filters);
         request.setAttribute("statuses", statuses);
+        request.getRequestDispatcher("/WEB-INF/views/manage/layout/layout.jsp").forward(request, response);
     }
 
-    private void showOrderDetail(HttpServletRequest request, HttpServletResponse response) {
+    private void showOrderDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int id = Helper.parseIntegerSafe(request.getParameter("id"), -1);
         Order order = orderService.selectOrderById(id);
         List<OrderDetail> orderDetails = orderService.selectOrderDetailByOrderId(order.getId());
@@ -155,31 +165,37 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("orderDetails", orderDetails);
         request.setAttribute("totalAmount", totalAmount);
         request.setAttribute("statuses", statuses);
+        request.getRequestDispatcher("/WEB-INF/views/manage/layout/layout.jsp").forward(request, response);
     }
 
-    private void getOrderStatusLogs(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String orderIdStr = request.getParameter("orderId");
-        if (orderIdStr == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "orderId required");
-            return;
-        }
+    private void getOrderDetail(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Order order = orderService.selectOrderById(id);
+        List<OrderDetail> details = orderService.selectOrderDetailByOrderId(id);
 
-        try {
-            int orderId = Integer.parseInt(orderIdStr);
-            List<OrderStatusLog> logs = orderService.getOrderStatusLogs(orderId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("order", order);
+        result.put("items", details);
 
-            // Convert to JSON (tùy lib: Gson / Jackson). Ví dụ dùng Gson:
-            response.setContentType("application/json;charset=UTF-8");
-            String json = new com.google.gson.GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd HH:mm:ss")
-                    .create()
-                    .toJson(logs);
-            response.getWriter().print(json);
-        } catch (Exception e) {
-            response.sendError(500, e.getMessage());
-        }
+        response.setContentType("application/json; charset=UTF-8");
+        new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .create()
+                .toJson(result, response.getWriter());
     }
 
+    private void getBankAccountInfo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        BankAccount bankAccount = new BankAccountServiceImpl().getBankAccount();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("bankAccount", bankAccount);
+
+        response.setContentType("application/json; charset=UTF-8");
+        new GsonBuilder()
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .create()
+                .toJson(result, response.getWriter());
+    }
     //  --------------- do post --------------------
 
     private void handleCreateOrder(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -223,7 +239,7 @@ public class OrderServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/order");
     }
 
-    private void handleChangeOrderStatus(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleChangeOrderStatus(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
         int status = Integer.parseInt(request.getParameter("status"));
         String note = request.getParameter("note");
@@ -237,9 +253,26 @@ public class OrderServlet extends HttpServlet {
             session.setAttribute("message", "Cập nhật thất bại - vui lòng thử lại!");
             session.setAttribute("status", "error");
         }
-
-        response.sendRedirect(request.getContextPath() + "/order");
+        showOrderDetail(request, response);
     }
 
-
+    private void handleCompleteOrder(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
+        double discount = Double.parseDouble(request.getParameter("discount"));
+        String paymentMethod = request.getParameter("paymentMethod");
+        String note = request.getParameter("note");
+        HttpSession session = request.getSession();
+        Employee employee = (Employee) session.getAttribute("account");
+        boolean isUpdated = orderService.changeOrderStatus(id, 3, employee, note);
+        boolean isCreatedInvoice = new InvoiceServiceImpl().createInvoice(id, employee.getId(), totalAmount, discount, (totalAmount - discount), paymentMethod);
+        if (isUpdated && isCreatedInvoice) {
+            session.setAttribute("message", "Cập nhật thành công!");
+            session.setAttribute("status", "success");
+        } else {
+            session.setAttribute("message", "Cập nhật thất bại - vui lòng thử lại!");
+            session.setAttribute("status", "error");
+        }
+        showOrderDetail(request, response);
+    }
 }

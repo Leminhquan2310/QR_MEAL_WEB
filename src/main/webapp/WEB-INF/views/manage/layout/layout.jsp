@@ -61,7 +61,7 @@
         <a href="category?page=1" class="${pageActive == 'category' ? 'active' : ''}">🥗 Phân loại sản phẩm</a>
         <a href="menu.jsp?page=1" class="${pageActive == 'menu' ? 'active' : ''}">📋 Menu</a>
         <a href="order?page=1" class="${pageActive == 'order' ? 'active' : ''}">🧾 Đơn hàng</a>
-        <a href="settings.jsp" class="${pageActive == 'settings' ? 'active' : ''}">⚙️ Cấu hình</a>
+        <a href="/setting" class="${pageActive == 'setting' ? 'active' : ''}">⚙️ Cấu hình</a>
     </div>
 
     <!-- Content -->

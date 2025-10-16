@@ -16,3 +16,10 @@
     font-weight: 600;
     color: #555;
 }
+
+#pm-items th, #pm-items td {
+    padding: 4px 6px;
+}
+#pm-items tbody tr:not(:last-child) {
+    border-bottom: 1px dashed #ddd;
+}
