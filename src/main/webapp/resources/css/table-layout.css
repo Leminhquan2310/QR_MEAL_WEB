@@ -1,0 +1,66 @@
+/* Vùng chứa layout */
+#layout-area {
+    position: relative;
+    width: 100%;
+    min-height: 632px;
+    background: repeating-linear-gradient(
+            0deg,
+            #f9f9f9,
+            #f9f9f9 49px,
+            #ececec 50px
+    ),
+    repeating-linear-gradient(
+            90deg,
+            #f9f9f9,
+            #f9f9f9 49px,
+            #ececec 50px
+    );
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* Phần tử bàn */
+.table-item {
+    position: absolute;
+    border-radius: 12px;
+    font-weight: 600;
+    text-align: center;
+    line-height: 90px;
+    cursor: grab;
+    user-select: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #adb5bd, #6c757d);
+    color: white;
+}
+
+/* Khi đang kéo */
+.table-item:active {
+    cursor: grabbing;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    z-index: 999;
+}
+
+
+/* Khi hover bàn */
+.table-item:hover {
+    box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+/* Tên bàn ở giữa */
+.table-item span {
+    position: relative;
+    font-size: 0.9rem;
+    z-index: 2;
+}
+
+/* Hiệu ứng nền mờ */
+.table-item::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: inherit;
+    z-index: 1;
+}

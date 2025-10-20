@@ -2,7 +2,8 @@ package com.qr_meal_web.enums;
 
 public enum TableStatus {
     INACTIVE(0, "Ngưng hoạt động", "secondary"),
-    ACTIVE(1, "Hoạt động", "success");
+    AVAILABLE(1, "Trống", "success"),
+    OCCUPIED(2, "Đang phục vụ", "warning");
 
     private int code;
     private String label;
@@ -34,4 +35,13 @@ public enum TableStatus {
         }
         throw new IllegalArgumentException("Invalid TableStatus code: " + code);
     }
+
+    public static TableStatus fromOrderStatus(OrderStatus orderStatus) {
+        if (orderStatus == null) return AVAILABLE;
+        return switch (orderStatus) {
+            case PENDING, CONFIRMED, SERVING -> OCCUPIED;
+            default -> AVAILABLE;
+        };
+    }
+
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CategoryRepositoryImpl implements CategoryRepository {
     private Connection connection;
-    private static final String SELECT_LIST_CATEGORY = "SELECT * FROM category";
+    private static final String SELECT_LIST_CATEGORY = "SELECT * FROM category WHERE status = 1";
     private static final String SELECT_ALL_CATEGORY = "SELECT * FROM category LIMIT ? OFFSET ?";
     private static final String INSERT_CATEGORY = "INSERT  INTO category (name, description, icon) values (?, ?, ?)";
     private static final String SELECT_CATEGORY = "SELECT * FROM category WHERE id = ?";

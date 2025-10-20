@@ -14,8 +14,6 @@ public interface OrderRepository {
 
     Order selectOrderById(int id);
 
-    List<OrderDetail> selectOrderDetailByOrderId(int id);
-
     boolean deleteOrder(int id);
 
     boolean changOrderStatus(Order order) throws SQLException;

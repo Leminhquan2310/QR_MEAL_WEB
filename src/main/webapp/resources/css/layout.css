@@ -98,10 +98,10 @@ body {
 
 .page-title {
     font-family: "Segoe UI", Arial, sans-serif;
-    font-size: 42px;
+    font-size: 25px;
     font-weight: 800;
     text-align: center;
-    margin: 40px 0;
+    margin: 20px 0;
     background: linear-gradient(90deg, #007bff, #00c6ff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -211,12 +211,12 @@ body {
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, #f9fafb, #e5e7eb); /* gradient xám sáng */
+    background: #e5e7eb; /* gradient xám sáng */
     color: #374151;
 }
 
 .btn-secondary:hover {
-    background: linear-gradient(135deg, #f3f4f6, #d1d5db);
+    background:  #d1d5db;
     color: #111827;
     transform: translateY(-2px);
     box-shadow: 0 6px 14px rgba(0,0,0,0.12),

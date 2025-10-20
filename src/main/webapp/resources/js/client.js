@@ -188,4 +188,17 @@ function updateQuantity(productId, delta) {
 // Khởi tạo event khi load
 document.addEventListener('DOMContentLoaded', () => {
     initCartEvents();
+    const footer = document.querySelector('#cartModal .modal-footer');
+    const tabCart = document.getElementById('pills-cart-tab');
+    const tabOrdered = document.getElementById('pills-ordered-tab');
+
+    // Khi nhấn "Giỏ hàng" → hiện footer
+    tabCart.addEventListener('shown.bs.tab', function () {
+        footer.classList.remove('d-none');
+    });
+
+    // Khi nhấn "Món đã gọi" → ẩn footer
+    tabOrdered.addEventListener('shown.bs.tab', function () {
+        footer.classList.add('d-none');
+    });
 });

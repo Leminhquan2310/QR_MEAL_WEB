@@ -13,6 +13,11 @@ public class TableServiceImpl implements TableService {
     private final TableRepository tableRepository = new TableRepositoryImpl();
 
     @Override
+    public List<Table> getListTable() {
+        return tableRepository.selectListTable();
+    }
+
+    @Override
     public List<Table> selectAllTable(int limit, int page) {
         int offset = (page - 1) * limit;
         return tableRepository.selectAllTable(limit, offset);
@@ -36,6 +41,16 @@ public class TableServiceImpl implements TableService {
     @Override
     public boolean updateTable(int id, String qr_code, String name) {
         return tableRepository.updateTable(id, qr_code, name);
+    }
+
+    @Override
+    public boolean updateTablePositions(List<Table> tables) {
+        return tableRepository.updateTablePositions(tables);
+    }
+
+    @Override
+    public boolean updateTableStatus(int id, int status) {
+        return tableRepository.updateTableStatus(id, status);
     }
 
     @Override

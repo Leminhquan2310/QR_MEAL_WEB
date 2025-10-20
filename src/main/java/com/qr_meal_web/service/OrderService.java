@@ -15,8 +15,6 @@ public interface OrderService {
 
     Order selectOrderById(int id);
 
-    List<OrderDetail> selectOrderDetailByOrderId(int id);
-
     boolean deleteOrder(int id);
 
     List<Order> filterOrder(int idOrTableId, int status, String createdFrom, String createdTo, int limit, int page);

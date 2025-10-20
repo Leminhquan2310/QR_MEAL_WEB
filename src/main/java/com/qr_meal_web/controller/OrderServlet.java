@@ -5,9 +5,11 @@ import com.qr_meal_web.enums.OrderStatus;
 import com.qr_meal_web.model.*;
 import com.qr_meal_web.service.CartService;
 import com.qr_meal_web.service.InvoiceService;
+import com.qr_meal_web.service.OrderDetailService;
 import com.qr_meal_web.service.OrderService;
 import com.qr_meal_web.service.impl.BankAccountServiceImpl;
 import com.qr_meal_web.service.impl.InvoiceServiceImpl;
+import com.qr_meal_web.service.impl.OrderDetailServiceImpl;
 import com.qr_meal_web.service.impl.OrderServiceImpl;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
@@ -30,6 +32,7 @@ public class OrderServlet extends HttpServlet {
     private int limit = 10;
     private int visiblePages = 5;
     private final OrderService orderService = new OrderServiceImpl();
+    private final OrderDetailService orderDetailService = new OrderDetailServiceImpl();
     private List<OrderStatus> statuses = Arrays.asList(OrderStatus.values());
 
 
@@ -152,7 +155,7 @@ public class OrderServlet extends HttpServlet {
     private void showOrderDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         int id = Helper.parseIntegerSafe(request.getParameter("id"), -1);
         Order order = orderService.selectOrderById(id);
-        List<OrderDetail> orderDetails = orderService.selectOrderDetailByOrderId(order.getId());
+        List<OrderDetail> orderDetails = orderDetailService.selectOrderDetailByOrderId(order.getId());
         List<OrderStatus> statuses = Arrays.asList(OrderStatus.values());
         double totalAmount = orderDetails.stream()
                 .mapToDouble(d -> d.getPrice() * d.getQuantity())
@@ -171,7 +174,7 @@ public class OrderServlet extends HttpServlet {
     private void getOrderDetail(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
         Order order = orderService.selectOrderById(id);
-        List<OrderDetail> details = orderService.selectOrderDetailByOrderId(id);
+        List<OrderDetail> details = orderDetailService.selectOrderDetailByOrderId(id);
 
         Map<String, Object> result = new HashMap<>();
         result.put("order", order);

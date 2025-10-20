@@ -1,12 +1,8 @@
 package com.qr_meal_web.controller;
 
 import com.qr_meal_web.model.*;
-import com.qr_meal_web.service.CartService;
-import com.qr_meal_web.service.CategoryService;
-import com.qr_meal_web.service.ProductService;
-import com.qr_meal_web.service.impl.CartServiceImpl;
-import com.qr_meal_web.service.impl.CategoryServiceImpl;
-import com.qr_meal_web.service.impl.ProductServiceImpl;
+import com.qr_meal_web.service.*;
+import com.qr_meal_web.service.impl.*;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -19,6 +15,7 @@ import java.util.List;
 public class ClientServlet extends HttpServlet {
     private final ProductService productService = new ProductServiceImpl();
     private final CategoryService categoryService = new CategoryServiceImpl();
+    private final OrderDetailService orderDetailService = new OrderDetailServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -58,9 +55,14 @@ public class ClientServlet extends HttpServlet {
         int category = Helper.parseIntegerSafe(request.getParameter("category"), -1);
         List<Product> products = productService.selectProductForClient(category);
         List<Category> categories = categoryService.selectListCategory();
+        List<OrderDetail> orderDetails = orderDetailService.selectOrderDetailByTableId((Integer) session.getAttribute("tableId"));
+        double totalAmount = orderDetails.stream()
+                .mapToDouble(d -> d.getPrice() * d.getQuantity())
+                .sum();
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
-
+        request.setAttribute("orderDetails", orderDetails);
+        request.setAttribute("totalAmount", totalAmount);
         request.getRequestDispatcher("/WEB-INF/views/client/index.jsp").forward(request, response);
     }
 

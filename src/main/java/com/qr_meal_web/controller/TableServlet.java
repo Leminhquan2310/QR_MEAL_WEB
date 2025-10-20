@@ -1,5 +1,7 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Table;
 import com.qr_meal_web.service.TableService;
@@ -12,7 +14,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +36,9 @@ public class TableServlet extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null) action = "";
         switch (action) {
+            case "table-layout":
+                showTableLayout(request, response);
+                break;
             case "filters":
                 showFiltersTable(request, response);
                 break;
@@ -59,7 +66,16 @@ public class TableServlet extends HttpServlet {
             case "delete":
                 handleDeleteTable(request, response);
                 break;
+            case "update-positions":
+                handleUpdatePositions(request, response);
+                break;
         }
+    }
+    private void showTableLayout(HttpServletRequest request, HttpServletResponse response) {
+        request.setAttribute("pageTitle", "Quản lý sơ đồ bàn");
+        request.setAttribute("pageContent", "../table/table-layout.jsp");
+        request.setAttribute("pageJs", "/resources/js/table-layout.js");
+        request.setAttribute("pageCss", "/resources/css/table-layout.css");
     }
 
     private void showAllTable(HttpServletRequest request, HttpServletResponse response) {
@@ -193,5 +209,19 @@ public class TableServlet extends HttpServlet {
         session.setAttribute("message", message);
         session.setAttribute("status", status);
         response.sendRedirect(request.getContextPath() + "/table");
+    }
+
+    private void handleUpdatePositions(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 1️⃣ Đọc dữ liệu JSON từ body request
+        BufferedReader reader = request.getReader();
+
+        // 2️⃣ Xác định kiểu dữ liệu: List<Table>
+        Type listType = new TypeToken<List<Table>>(){}.getType();
+
+        // 3️⃣ Chuyển JSON -> List<Table>
+        List<Table> tables = new Gson().fromJson(reader, listType);
+
+        // 5️⃣ Gọi service update
+        tableService.updateTablePositions(tables);
     }
 }

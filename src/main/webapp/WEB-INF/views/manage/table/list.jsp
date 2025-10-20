@@ -8,6 +8,10 @@
         <i class="fa-solid fa-plus"></i> Thêm bàn
     </button>
 
+    <a href="/table?action=table-layout" type="button" class="btn btn-info mb-3" >
+        <i class="fa-solid fa-image"></i> Sơ đồ bàn
+    </a>
+
     <div class="card shadow-sm mb-3">
         <div class="card-body p-3"> <!-- giảm padding -->
             <form method="get" action="/table" class="row g-3 align-items-end">

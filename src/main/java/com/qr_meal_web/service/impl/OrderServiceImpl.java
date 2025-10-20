@@ -1,6 +1,7 @@
 package com.qr_meal_web.service.impl;
 
 import com.qr_meal_web.enums.OrderStatus;
+import com.qr_meal_web.enums.TableStatus;
 import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Order;
 import com.qr_meal_web.model.OrderDetail;
@@ -11,6 +12,8 @@ import com.qr_meal_web.repository.impl.OrderRepositoryImpl;
 import com.qr_meal_web.repository.impl.OrderStatusLogRepositoryImpl;
 import com.qr_meal_web.service.CartService;
 import com.qr_meal_web.service.OrderService;
+import com.qr_meal_web.service.OrderStatusLogService;
+import com.qr_meal_web.service.TableService;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -19,11 +22,14 @@ import java.util.List;
 
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository = new OrderRepositoryImpl();
-    private final OrderStatusLogRepository orderStatusLogRepository = new OrderStatusLogRepositoryImpl();
+    private final OrderStatusLogService orderStatusLogService = new OrderStatusLogServiceImpl();
+    private final TableService tableService = new TableServiceImpl();
 
     @Override
     public boolean insertOrder(int table_id, CartService cart) {
-        return orderRepository.insertOrder(table_id, cart);
+        boolean resultOD = orderRepository.insertOrder(table_id, cart);
+        boolean resultTB = tableService.updateTableStatus(table_id, TableStatus.OCCUPIED.getCode());
+        return resultOD && resultTB;
     }
 
     @Override
@@ -36,12 +42,6 @@ public class OrderServiceImpl implements OrderService {
     public Order selectOrderById(int id) {
         return orderRepository.selectOrderById(id);
     }
-
-    @Override
-    public List<OrderDetail> selectOrderDetailByOrderId(int id) {
-        return orderRepository.selectOrderDetailByOrderId(id);
-    }
-
 
     @Override
     public boolean deleteOrder(int id) {
@@ -149,17 +149,20 @@ public class OrderServiceImpl implements OrderService {
         log.setNote(note);
         boolean resultOS = false;
         try {
-            resultOS = orderStatusLogRepository.save(log);
+            resultOS = orderStatusLogService.save(log);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return resultO & resultOS;
+
+        TableStatus newTableStatus = TableStatus.fromOrderStatus(OrderStatus.fromCode(newStatus));
+        boolean resultTB = tableService.updateTableStatus(order.getTable_id(), newTableStatus.getCode());
+        return resultO && resultOS && resultTB;
     }
 
     @Override
     public List<OrderStatusLog> getOrderStatusLogs(int orderId) {
         try {
-            return orderStatusLogRepository.findByOrderId(orderId);
+            return orderStatusLogService.findByOrderId(orderId);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
