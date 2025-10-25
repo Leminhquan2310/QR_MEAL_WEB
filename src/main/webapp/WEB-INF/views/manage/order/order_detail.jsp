@@ -96,8 +96,8 @@
                     <th>Ảnh</th>
                     <th>Tên sản phẩm</th>
                     <th>Số lượng</th>
-                    <th>Đơn giá</th>
                     <th>Thành tiền</th>
+                    <th>Đơn giá</th>
                 </tr>
                 </thead>
                 <tbody>

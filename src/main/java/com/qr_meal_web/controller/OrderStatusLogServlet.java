@@ -6,9 +6,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.qr_meal_web.enums.OrderStatus;
 import com.qr_meal_web.model.OrderStatusLog;
-import com.qr_meal_web.repository.OrderStatusLogRepository;
-import com.qr_meal_web.service.OrderService;
-import com.qr_meal_web.service.impl.OrderServiceImpl;
+import com.qr_meal_web.service.OrderStatusLogService;
+import com.qr_meal_web.service.impl.OrderStatusLogServiceImpl;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -21,7 +20,7 @@ import java.util.List;
 
 @WebServlet("/order/status-logs")
 public class OrderStatusLogServlet extends HttpServlet {
-    private final OrderService orderService = new OrderServiceImpl();
+    private final OrderStatusLogService orderStatusLogService = new OrderStatusLogServiceImpl();
 
 
     @Override
@@ -34,7 +33,7 @@ public class OrderStatusLogServlet extends HttpServlet {
 
         try {
             int orderId = Integer.parseInt(orderIdStr);
-            List<OrderStatusLog> logs = orderService.getOrderStatusLogs(orderId);
+            List<OrderStatusLog> logs = orderStatusLogService.findByOrderId(orderId);
             // Convert to JSON (tùy lib: Gson / Jackson). Ví dụ dùng Gson:
             resp.setContentType("application/json;charset=UTF-8");
             String json = new com.google.gson.GsonBuilder()

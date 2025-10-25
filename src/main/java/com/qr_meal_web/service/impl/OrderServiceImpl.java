@@ -2,19 +2,14 @@ package com.qr_meal_web.service.impl;
 
 import com.qr_meal_web.enums.OrderStatus;
 import com.qr_meal_web.enums.TableStatus;
-import com.qr_meal_web.model.Employee;
-import com.qr_meal_web.model.Order;
-import com.qr_meal_web.model.OrderDetail;
-import com.qr_meal_web.model.OrderStatusLog;
-import com.qr_meal_web.repository.OrderRepository;
-import com.qr_meal_web.repository.OrderStatusLogRepository;
-import com.qr_meal_web.repository.impl.OrderRepositoryImpl;
-import com.qr_meal_web.repository.impl.OrderStatusLogRepositoryImpl;
-import com.qr_meal_web.service.CartService;
-import com.qr_meal_web.service.OrderService;
-import com.qr_meal_web.service.OrderStatusLogService;
-import com.qr_meal_web.service.TableService;
+import com.qr_meal_web.model.*;
+import com.qr_meal_web.repository.*;
+import com.qr_meal_web.repository.impl.*;
+import com.qr_meal_web.service.*;
+import com.qr_meal_web.util.DBConnection;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -22,14 +17,49 @@ import java.util.List;
 
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository = new OrderRepositoryImpl();
-    private final OrderStatusLogService orderStatusLogService = new OrderStatusLogServiceImpl();
-    private final TableService tableService = new TableServiceImpl();
+    private final OrderStatusLogRepository orderStatusLogRepository = new OrderStatusLogRepositoryImpl();
+    private final TableRepository tableRepository = new TableRepositoryImpl();
 
     @Override
     public boolean insertOrder(int table_id, CartService cart) {
-        boolean resultOD = orderRepository.insertOrder(table_id, cart);
-        boolean resultTB = tableService.updateTableStatus(table_id, TableStatus.OCCUPIED.getCode());
-        return resultOD && resultTB;
+        OrderDetailRepository orderDetailRepository = new OrderDetailRepositoryImpl();
+        Connection connection = null;
+        try {
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
+
+            // 1. Tạo order + order detail
+            int order_id = orderRepository.insertOrder(connection, table_id, cart);
+
+
+            for (CartItem cartItem : cart.getItems()) {
+                orderDetailRepository.insertOrderDetail(connection, order_id, cartItem);
+            }
+            // 2. Cập nhật trạng thái bàn
+            tableRepository.updateTableStatus(connection, table_id, TableStatus.OCCUPIED.getCode());
+
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
@@ -41,6 +71,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order selectOrderById(int id) {
         return orderRepository.selectOrderById(id);
+    }
+
+    @Override
+    public Order selectOrderByTableIdAvailable(int id) {
+        return orderRepository.selectOrderByTableIdAvailable(id);
     }
 
     @Override
@@ -124,48 +159,106 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public boolean changeOrderStatus(int orderId, int newStatus, Employee changedBy, String note) {
-        // 1. Lấy order hiện tại
         Order order = orderRepository.selectOrderById(orderId);
-        if (order == null) throw new IllegalArgumentException("Order not found: " + orderId);
-
-        OrderStatus oldStatus = order.getStatus();
-        if (oldStatus != null && oldStatus.equals(newStatus)) ;
-        else order.setStatus(OrderStatus.fromCode(newStatus));
-
-
-        boolean resultO = false;
+        Connection connection = null;
         try {
-            resultO = orderRepository.changOrderStatus(order);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
 
-        // 3. Lưu log thay đổi
-        OrderStatusLog log = new OrderStatusLog();
-        log.setOrderId(orderId);
-        log.setOld_status(oldStatus);
-        log.setNew_status(OrderStatus.fromCode(newStatus));
-        log.setChanged_by(changedBy);
-        log.setNote(note);
-        boolean resultOS = false;
-        try {
-            resultOS = orderStatusLogService.save(log);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            orderRepository.changOrderStatus(connection, orderId, OrderStatus.fromCode(newStatus));
 
-        TableStatus newTableStatus = TableStatus.fromOrderStatus(OrderStatus.fromCode(newStatus));
-        boolean resultTB = tableService.updateTableStatus(order.getTable_id(), newTableStatus.getCode());
-        return resultO && resultOS && resultTB;
+            // 3. Lưu log thay đổi
+            OrderStatusLog log = new OrderStatusLog();
+            log.setOrderId(orderId);
+            log.setOld_status(order.getStatus());
+            log.setNew_status(OrderStatus.fromCode(newStatus));
+            log.setChanged_by(changedBy);
+            log.setNote(note);
+            orderStatusLogRepository.save(connection, log);
+
+            TableStatus newTableStatus = TableStatus.fromOrderStatus(OrderStatus.fromCode(newStatus));
+            tableRepository.updateTableStatus(connection, order.getTable_id(), newTableStatus.getCode());
+
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
-    public List<OrderStatusLog> getOrderStatusLogs(int orderId) {
+    public boolean completeOrder(int orderId, Employee employee, double discount, String paymentMethod) {
+        InvoiceService invoiceService = new InvoiceServiceImpl();
+        Connection connection = null;
         try {
-            return orderStatusLogService.findByOrderId(orderId);
+            connection = DBConnection.getConnection();
+            connection.setAutoCommit(false);
+
+            // 1. Lấy thông tin order hiện tại
+            Order order = orderRepository.selectOrderById(orderId);
+            if (order == null) return false;
+
+            // 2. Cập nhật trạng thái order -> COMPLETED
+            orderRepository.changOrderStatus(connection, orderId, OrderStatus.DONE);
+
+            // 3. Lưu log thay đổi
+            OrderStatusLog log = new OrderStatusLog();
+            log.setOrderId(orderId);
+            log.setOld_status(order.getStatus());
+            log.setNew_status(OrderStatus.DONE);
+            log.setChanged_by(employee);
+            log.setNote("Hoàn tất hóa đơn");
+            orderStatusLogRepository.save(connection, log);
+
+            // 4. Cập nhật trạng thái bàn
+            TableStatus newTableStatus = TableStatus.fromOrderStatus(OrderStatus.DONE);
+            tableRepository.updateTableStatus(connection, order.getTable_id(), newTableStatus.getCode());
+
+            // 5. Tạo hóa đơn
+            invoiceService.createInvoice(connection, orderId, employee.getId(), discount, paymentMethod);
+
+            // ✅ Commit toàn bộ transaction
+            connection.commit();
+            return true;
+
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
+
 
 }

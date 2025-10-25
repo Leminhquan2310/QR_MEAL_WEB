@@ -38,7 +38,7 @@ public class AuthServlet extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("account", resultCheckLogin);
             if (resultCheckLogin.getRole().getId() == 4) {
-                response.sendRedirect(request.getContextPath() + "employee");
+                response.sendRedirect(request.getContextPath() + "dashboard");
             }
         } else {
             request.setAttribute("error", "Sai tài khoản hoặc mật khẩu!");

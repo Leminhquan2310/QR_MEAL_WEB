@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 public class Invoice {
     private int id;
-    private int order_d;
+    private int order_id;
     private int employee_id;
     private double total_amount;
     private double discount;
@@ -17,9 +17,9 @@ public class Invoice {
     public Invoice() {
     }
 
-    public Invoice(int id, int order_d, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method, Timestamp created_at) {
+    public Invoice(int id, int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method, Timestamp created_at) {
         this.id = id;
-        this.order_d = order_d;
+        this.order_id = order_id;
         this.employee_id = employee_id;
         this.total_amount = total_amount;
         this.discount = discount;
@@ -28,8 +28,8 @@ public class Invoice {
         this.created_at = created_at;
     }
 
-    public Invoice(int order_d, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method) {
-        this.order_d = order_d;
+    public Invoice(int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method) {
+        this.order_id = order_id;
         this.employee_id = employee_id;
         this.total_amount = total_amount;
         this.discount = discount;
@@ -46,11 +46,11 @@ public class Invoice {
     }
 
     public int getOrder_d() {
-        return order_d;
+        return order_id;
     }
 
-    public void setOrder_d(int order_d) {
-        this.order_d = order_d;
+    public void setOrder_d(int order_id) {
+        this.order_id = order_id;
     }
 
     public int getEmployee_id() {

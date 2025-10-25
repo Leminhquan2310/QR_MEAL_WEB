@@ -15,6 +15,8 @@ public interface OrderService {
 
     Order selectOrderById(int id);
 
+    Order selectOrderByTableIdAvailable(int id);
+
     boolean deleteOrder(int id);
 
     List<Order> filterOrder(int idOrTableId, int status, String createdFrom, String createdTo, int limit, int page);
@@ -25,5 +27,5 @@ public interface OrderService {
 
     boolean changeOrderStatus(int orderId, int newStatus, Employee changedBy, String note);
 
-    List<OrderStatusLog> getOrderStatusLogs(int orderId);
+    boolean completeOrder(int orderId,  Employee employee, double discount, String paymentMethod);
 }

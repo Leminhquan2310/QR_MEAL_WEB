@@ -1,7 +1,6 @@
 package com.qr_meal_web.repository.impl;
 
 import com.qr_meal_web.enums.OrderStatus;
-import com.qr_meal_web.enums.ProductStatus;
 import com.qr_meal_web.model.*;
 import com.qr_meal_web.repository.OrderRepository;
 import com.qr_meal_web.service.CartService;
@@ -15,9 +14,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     private Connection connection;
     private static final String SELECT_ALL_ORDER = "SELECT * FROM `order` ORDER BY created_at DESC LIMIT ? OFFSET ?";
     private static final String SELECT_ORDER_BY_ID = "SELECT * FROM `order` WHERE id = ?";
+    private static final String SELECT_ORDER_BY_TABLE_ID = "SELECT * FROM `order` WHERE table_id = ? AND status NOT IN (3, 4)";
     private static final String FILTER_ORDER = "SELECT * FROM `order` WHERE 1=1";
     private static final String INSERT_ORDER = "INSERT INTO `order` (table_id) values (?)";
-    private static final String INSERT_ORDER_DETAIL = "INSERT INTO orderdetail (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_ORDER_STATUS = "UPDATE `order` SET status = ? WHERE id = ?";
     private static final String COUNT_ORDER_IN_INVOICE = "SELECT count(*) FROM invoice WHERE order_id = ?";
     private static final String COUNT_ORDER_IN_PAYMENT = "SELECT count(*) FROM payment WHERE order_id = ?";
@@ -25,55 +24,14 @@ public class OrderRepositoryImpl implements OrderRepository {
     private static final String DELETE_ORDER_DETAIL = "DELETE FROM orderdetail WHERE order_id = ?";
 
     @Override
-    public boolean insertOrder(int table_id, CartService cart) {
-        try {
-            connection = DBConnection.getConnection();
-            connection.setAutoCommit(false);
-            PreparedStatement statementOrder = connection.prepareStatement(INSERT_ORDER, Statement.RETURN_GENERATED_KEYS);
-
-            statementOrder.setInt(1, table_id);
-            int rowAffected = statementOrder.executeUpdate();
-            ResultSet rs = statementOrder.getGeneratedKeys();
-
-            int order_id = -1;
-            if (rs.next()) order_id = rs.getInt(1);
-
-            if (rowAffected != 1) {
-                connection.rollback();
-                return false;
-            }
-
-            for (CartItem item : cart.getItems()) {
-                PreparedStatement statementOrderDetail = connection.prepareStatement(INSERT_ORDER_DETAIL);
-                statementOrderDetail.setInt(1, order_id);
-                statementOrderDetail.setInt(2, item.getProduct().getId());
-                statementOrderDetail.setInt(3, item.getQuantity());
-                statementOrderDetail.setDouble(4, item.getProduct().getPrice());
-                statementOrderDetail.executeUpdate();
-            }
-
-            connection.commit();
-            return true;
-        } catch (SQLException e) {
-            if (connection != null) {
-                try {
-                    connection.rollback();
-                } catch (SQLException ex) {
-                    System.out.println(ex.getMessage());
-                }
-            }
-            System.out.println(e.getMessage());
-            return false;
-        } finally {
-            if (connection != null) {
-                try {
-                    connection.setAutoCommit(true);
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public int insertOrder(Connection connection, int table_id, CartService cart) throws SQLException {
+        int result = -1;
+        PreparedStatement statementOrder = connection.prepareStatement(INSERT_ORDER, Statement.RETURN_GENERATED_KEYS);
+        statementOrder.setInt(1, table_id);
+        statementOrder.executeUpdate();
+        ResultSet rs = statementOrder.getGeneratedKeys();
+        if (rs.next()) result = rs.getInt(1);
+        return result;
     }
 
     @Override
@@ -116,13 +74,31 @@ public class OrderRepositoryImpl implements OrderRepository {
         return null;
     }
 
+    @Override
+    public Order selectOrderByTableIdAvailable(int id) {
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ORDER_BY_TABLE_ID)) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                int order_id = rs.getInt("id");
+                int table_id = rs.getInt("table_id");
+                Timestamp created_at = rs.getTimestamp("created_at");
+                OrderStatus status = OrderStatus.fromCode(rs.getInt("status"));
+                return new Order(order_id, table_id, created_at, status);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
 
     @Override
-    public boolean changOrderStatus(Order order) {
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_ORDER_STATUS)) {
-            statement.setInt(1, order.getStatus().getCode());
-            statement.setInt(2, order.getId());
+    public boolean changOrderStatus(Connection connection, int order_id, OrderStatus status) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_ORDER_STATUS)) {
+            statement.setInt(1, status.getCode());
+            statement.setInt(2, order_id);
             statement.executeUpdate();
             return true;
         } catch (SQLException e) {

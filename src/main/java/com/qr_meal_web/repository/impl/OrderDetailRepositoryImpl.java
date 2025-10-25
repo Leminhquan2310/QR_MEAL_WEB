@@ -1,6 +1,7 @@
 package com.qr_meal_web.repository.impl;
 
 import com.qr_meal_web.enums.ProductStatus;
+import com.qr_meal_web.model.CartItem;
 import com.qr_meal_web.model.Category;
 import com.qr_meal_web.model.OrderDetail;
 import com.qr_meal_web.model.Product;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderDetailRepositoryImpl implements OrderDetailRepository {
+    private static final String INSERT_ORDER_DETAIL = "INSERT INTO orderdetail (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
     private static final String SELECT_ORDER_DETAIL_BY_ORDER_ID =
             "SELECT od.order_id, od.quantity, od.price as unit_price, p.*, c.id AS c_id, c.name AS c_name, c.icon AS c_icon " +
                     "FROM orderdetail od " +
@@ -25,6 +27,16 @@ public class OrderDetailRepositoryImpl implements OrderDetailRepository {
                     "FROM `order` o JOIN orderdetail od ON o.id = od.order_id " +
                     "JOIN product p ON od.product_id = p.id " +
                     "JOIN category c ON p.category_id = c.id WHERE o.table_id = ? AND o.status NOT IN (3, 4)";
+
+    @Override
+    public void insertOrderDetail(Connection connection, int order_id, CartItem cartItem) throws SQLException {
+        PreparedStatement statementOrderDetail = connection.prepareStatement(INSERT_ORDER_DETAIL);
+        statementOrderDetail.setInt(1, order_id);
+        statementOrderDetail.setInt(2, cartItem.getProduct().getId());
+        statementOrderDetail.setInt(3, cartItem.getQuantity());
+        statementOrderDetail.setDouble(4, cartItem.getProduct().getPrice());
+        statementOrderDetail.executeUpdate();
+    }
 
     @Override
     public List<OrderDetail> selectOrderDetailByOrderId(int id) {

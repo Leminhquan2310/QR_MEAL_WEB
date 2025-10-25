@@ -206,9 +206,8 @@ public class TableRepositoryImpl implements TableRepository {
     }
 
     @Override
-    public boolean updateTableStatus(int id, int status) {
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_TABLE_STATUS)) {
+    public boolean updateTableStatus(Connection connection, int id, int status) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_TABLE_STATUS)) {
             statement.setInt(1, status);
             statement.setInt(2, id);
             statement.executeUpdate();

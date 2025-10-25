@@ -49,11 +49,6 @@ public class TableServiceImpl implements TableService {
     }
 
     @Override
-    public boolean updateTableStatus(int id, int status) {
-        return tableRepository.updateTableStatus(id, status);
-    }
-
-    @Override
     public boolean checkCanDelete(int id) {
         return tableRepository.checkCanDelete(id);
     }

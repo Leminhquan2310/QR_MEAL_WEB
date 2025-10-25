@@ -1,11 +1,11 @@
 package com.qr_meal_web.enums;
 
 public enum OrderStatus {
-    PENDING(0, "Pending", "secondary"),
-    CONFIRMED(1, "Confirmed", "info"),
-    SERVING(2, "Serving", "warning text-dark"),
-    DONE(3, "Done", "success"),
-    CANCELLED(4, "Cancelled", "danger");
+    PENDING(0, "Chờ xác nhận", "secondary"),
+    CONFIRMED(1, "Đã xác nhận", "info"),
+    SERVING(2, "Đang phục vụ", "warning text-dark"),
+    DONE(3, "Hoàn thành", "success"),
+    CANCELLED(4, "Đã hủy", "danger");
 
     private final int code;
     private final String label;

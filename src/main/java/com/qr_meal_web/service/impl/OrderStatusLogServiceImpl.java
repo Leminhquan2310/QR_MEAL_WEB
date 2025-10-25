@@ -12,12 +12,7 @@ public class OrderStatusLogServiceImpl implements OrderStatusLogService {
     private final OrderStatusLogRepository orderStatusLogRepository = new OrderStatusLogRepositoryImpl();
 
     @Override
-    public boolean save(OrderStatusLog log) throws SQLException {
-        return orderStatusLogRepository.save(log);
-    }
-
-    @Override
-    public List<OrderStatusLog> findByOrderId(int orderId) throws SQLException {
+    public List<OrderStatusLog> findByOrderId(int orderId) {
         return orderStatusLogRepository.findByOrderId(orderId);
     }
 }

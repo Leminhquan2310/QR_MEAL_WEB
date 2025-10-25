@@ -19,9 +19,8 @@ public class OrderStatusLogRepositoryImpl implements OrderStatusLogRepository {
 
 
     @Override
-    public boolean save(OrderStatusLog log) throws SQLException {
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(INSERT_ORDER_STATUS_LOG)) {
+    public boolean save(Connection connection, OrderStatusLog log) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(INSERT_ORDER_STATUS_LOG)) {
             ps.setInt(1, log.getOrderId());
             ps.setInt(2, log.getOld_status().getCode());
             ps.setInt(3, log.getNew_status().getCode());
@@ -36,7 +35,7 @@ public class OrderStatusLogRepositoryImpl implements OrderStatusLogRepository {
     }
 
     @Override
-    public List<OrderStatusLog> findByOrderId(int orderId) throws SQLException {
+    public List<OrderStatusLog> findByOrderId(int orderId) {
         List<OrderStatusLog> orderStatusLogs = new ArrayList<>();
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(SELECT_ORDER_STATUS_BY_ORDER_ID)) {
@@ -57,6 +56,8 @@ public class OrderStatusLogRepositoryImpl implements OrderStatusLogRepository {
                     orderStatusLogs.add(l);
                 }
             }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
         return orderStatusLogs;
     }

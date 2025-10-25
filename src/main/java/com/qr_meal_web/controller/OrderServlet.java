@@ -261,15 +261,12 @@ public class OrderServlet extends HttpServlet {
 
     private void handleCompleteOrder(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
-        double totalAmount = Double.parseDouble(request.getParameter("totalAmount"));
         double discount = Double.parseDouble(request.getParameter("discount"));
         String paymentMethod = request.getParameter("paymentMethod");
-        String note = request.getParameter("note");
         HttpSession session = request.getSession();
         Employee employee = (Employee) session.getAttribute("account");
-        boolean isUpdated = orderService.changeOrderStatus(id, 3, employee, note);
-        boolean isCreatedInvoice = new InvoiceServiceImpl().createInvoice(id, employee.getId(), totalAmount, discount, (totalAmount - discount), paymentMethod);
-        if (isUpdated && isCreatedInvoice) {
+        boolean isSuccess = orderService.completeOrder(id, employee, discount, paymentMethod);
+        if (isSuccess) {
             session.setAttribute("message", "Cập nhật thành công!");
             session.setAttribute("status", "success");
         } else {

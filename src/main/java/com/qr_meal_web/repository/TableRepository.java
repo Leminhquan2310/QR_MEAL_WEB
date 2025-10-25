@@ -2,6 +2,7 @@ package com.qr_meal_web.repository;
 
 import com.qr_meal_web.model.Table;
 
+import java.sql.Connection;
 import java.util.List;
 
 public interface TableRepository {
@@ -17,7 +18,7 @@ public interface TableRepository {
 
     boolean updateTable(int id, String qr_code, String name);
 
-    boolean updateTableStatus(int id, int status);
+    boolean updateTableStatus(Connection connection, int id, int status);
 
     boolean checkCanDelete(int id);
 

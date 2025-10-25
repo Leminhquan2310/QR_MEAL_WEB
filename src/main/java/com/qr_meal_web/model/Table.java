@@ -126,11 +126,11 @@ public class Table {
         this.height = height;
     }
 
-    public String getSquare() {
+    public String getShape() {
         return shape;
     }
 
-    public void setSquare(String shape) {
+    public void setShape(String shape) {
         this.shape = shape;
     }
 

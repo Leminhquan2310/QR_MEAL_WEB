@@ -17,8 +17,6 @@ public interface TableService {
 
     boolean updateTablePositions(List<Table> tables);
 
-    boolean updateTableStatus(int id, int status);
-
     boolean checkCanDelete(int id);
 
     boolean deleteTable(int id);
