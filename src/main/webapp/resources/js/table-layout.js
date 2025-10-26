@@ -132,13 +132,17 @@ document.getElementById('saveLayout').onclick = () => {
         };
     });
 
-    console.log(tablesUpdate);
-
     fetch('/table?action=update-positions', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(tablesUpdate)
-    }).then(() => alert('Lưu thành công!'));
+    }).then(() => {
+        Swal.fire({
+            title:"Updated",
+            text: "Cập nhật thành công!",
+            icon: "success"
+        });
+    });
 };
 
 

@@ -347,7 +347,7 @@ function confirmPayment(id, totalAmount, discount) {
             const paymentMethod = result.value;
             const form = document.createElement("form");
             form.method = "POST";
-            form.action = `/order?action=completed-order`;
+            form.action = `/order?action=complete-order`;
 
             let inputData = {id, totalAmount, discount, paymentMethod}
             for (let key in inputData) {

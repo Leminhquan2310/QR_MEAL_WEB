@@ -9,7 +9,6 @@ import com.qr_meal_web.service.*;
 import com.qr_meal_web.util.DBConnection;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;

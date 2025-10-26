@@ -74,7 +74,7 @@ public class OrderServlet extends HttpServlet {
             case "delete":
                 handleDeleteOrder(request, response);
                 break;
-            case "completed-order":
+            case "complete-order":
                 handleCompleteOrder(request, response);
                 break;
             default:

@@ -2,7 +2,6 @@ package com.qr_meal_web.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Table;
 import com.qr_meal_web.service.TableService;
 import com.qr_meal_web.service.impl.TableServiceImpl;
@@ -71,6 +70,7 @@ public class TableServlet extends HttpServlet {
                 break;
         }
     }
+
     private void showTableLayout(HttpServletRequest request, HttpServletResponse response) {
         request.setAttribute("pageTitle", "Quản lý sơ đồ bàn");
         request.setAttribute("pageContent", "../table/table-layout.jsp");
@@ -211,12 +211,13 @@ public class TableServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/table");
     }
 
-    private void handleUpdatePositions(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void handleUpdatePositions(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         // 1️⃣ Đọc dữ liệu JSON từ body request
         BufferedReader reader = request.getReader();
 
         // 2️⃣ Xác định kiểu dữ liệu: List<Table>
-        Type listType = new TypeToken<List<Table>>(){}.getType();
+        Type listType = new TypeToken<List<Table>>() {
+        }.getType();
 
         // 3️⃣ Chuyển JSON -> List<Table>
         List<Table> tables = new Gson().fromJson(reader, listType);
