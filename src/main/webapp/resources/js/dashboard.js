@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 spinner.style.display = 'none';
                 container.style.display = 'block';
                 const oStatus = data.order?.status;
-
+                console.log(data)
                 // Gán vào modal
                 header.querySelector("#tableModalLabel").innerHTML = `${name}: ${oStatus?.label ?? "Trống"}`
 
@@ -76,10 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let footerHtml = `<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>`;
                 footerHtml += oStatus.code == "2" ?
                     `<button id="viewInvoiceBtn" class="btn btn-${status === "1" ? "success" : "warning"}"
-                            onclick="confirmPayment('${data.order.id}',0.0)">Thanh toán</button>` :
+                            onclick="openConfirmPaymentModal('${data.order.id}',0.0)">Thanh toán</button>` :
                     `<button id="viewInvoiceBtn" class="btn btn-${status === "1" ? "success" : "warning"}" 
                             onclick="updateStatusOrder('${data.order.id}','${labelButton}','Xác nhận thay đổi?',${oStatus.code + 1})">${labelButton}</button>`;
-
+                console.log("Set footer")
                 modalFooter.innerHTML = footerHtml;
                 totalSpan.textContent = total.toLocaleString('vi-VN');
             })
@@ -132,6 +132,15 @@ function updateStatusOrder(id, title, text, status) {
             form.submit();
         }
     });
+}
+
+function openConfirmPaymentModal(id, discount) {
+    const modal = new bootstrap.Modal(document.getElementById('confirmPaymentModal'));
+    document.getElementById('orderId').value = id;
+    document.getElementById('orderDiscount').value = discount;
+    document.getElementById('confirmPaymentForm').reset();
+    document.getElementById('pointFeedback').textContent = '';
+    modal.show();
 }
 
 function confirmPayment(id, discount) {

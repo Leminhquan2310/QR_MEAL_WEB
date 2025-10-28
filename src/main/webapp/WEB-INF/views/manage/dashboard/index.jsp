@@ -111,9 +111,61 @@
             </div>
 
             <div id="modalFooter" class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.2/lottie.min.js"></script>
+<!-- Modal xác nhận thanh toán -->
+<div class="modal fade" id="confirmPaymentModal" tabindex="-1" aria-labelledby="confirmPaymentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="confirmPaymentLabel">Xác nhận thanh toán</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <form id="confirmPaymentForm" method="POST" action="/dashboard?action=complete-order">
+                <div class="modal-body">
+
+                    <!-- Nhập số điện thoại khách hàng -->
+                    <div class="mb-3">
+                        <label for="customerPhone" class="form-label">Số điện thoại khách hàng</label>
+                        <input type="text" id="customerPhone" name="phone" class="form-control" placeholder="Nhập SĐT để tích điểm" required pattern="^(0|\+84)\d{9}$">
+                        <div class="form-text">Dùng để tích điểm hoặc giảm giá nếu có.</div>
+                        <div id="pointFeedback" class="text-success small mt-1"></div>
+                    </div>
+
+                    <!-- Chọn phương thức thanh toán -->
+                    <div class="mb-3">
+                        <label class="form-label">Phương thức thanh toán</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="pay_cash" value="cash" checked>
+                            <label class="form-check-label" for="pay_cash">Tiền mặt</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="pay_transfer" value="bank">
+                            <label class="form-check-label" for="pay_transfer">Chuyển khoản</label>
+                        </div>
+                    </div>
+
+                    <!-- Dùng điểm để giảm giá -->
+                    <div class="mb-3">
+                        <label for="usePoints" class="form-label">Dùng điểm để giảm giá (nếu có)</label>
+                        <input type="number" id="usePoints" name="usePoints" class="form-control" placeholder="Nhập số điểm muốn sử dụng" min="0">
+                        <div id="discountFeedback" class="form-text text-muted"></div>
+                    </div>
+
+                    <!-- Hidden input -->
+                    <input type="hidden" id="orderId" name="id">
+                    <input type="hidden" id="orderDiscount" name="discount">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

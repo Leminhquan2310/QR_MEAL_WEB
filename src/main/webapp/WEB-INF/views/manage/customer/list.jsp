@@ -7,9 +7,9 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <h5 class="card-title mb-3">📋 Danh sách loại sản phẩm</h5>
-            <table class="table table-bordered table-striped">
-                <thead>
+            <h5 class="card-title mb-3">📋 Danh sách khách hàng</h5>
+            <table class="table table-bordered table-hover align-middle text-center">
+                <thead class="table-primary">
                 <tr>
                     <th>ID</th>
                     <th>Tên</th>
@@ -28,9 +28,9 @@
                         <td>${c.points}</td>
                         <td>${c.created_at}</td>
                         <td>
-                            <a href="customer?action=edit&id=${c.id}" class="btn btn-sm btn-warning">Sửa</a>
-                            <a href="customer?action=delete&id=${c.id}" class="btn btn-sm btn-danger"
-                               onclick="return confirm('Xóa khách hàng này?')">Xóa</a>
+                            <a class="btn btn-sm btn-warning" onclick="showModalUpdateCustomer(${c.id})">✏ Sửa</a>
+                                <%--   <a href="customer?action=delete&id=${c.id}" class="btn btn-sm btn-danger"--%>
+                                <%--    onclick="return confirm('Xóa khách hàng này?')">🗑 Xóa</a>--%>
                         </td>
                     </tr>
                 </c:forEach>
@@ -103,12 +103,14 @@
                 <form action="customer?action=create" method="post" id="addCustomerForm">
                     <div class="mb-3">
                         <label class="form-label" for="name">Tên khách hàng</label>
-                        <input id="nameInput" type="text" name="name" class="form-control" required placeholder="Họ và tên...">
+                        <input id="nameInput" type="text" name="name" class="form-control" required
+                               placeholder="Họ và tên...">
                     </div>
 
                     <div class="mb-2">
                         <label class="form-label" for="phone">Số điện thoại</label>
-                        <input id="phoneInput" type="text" name="phone" class="form-control" required placeholder="VD: 0912345678">
+                        <input id="phoneInput" type="text" name="phone" class="form-control" required
+                               placeholder="VD: 0912345678">
                         <small id="phoneFeedback" class="text-danger mt-1"></small>
                     </div>
                 </form>
@@ -119,7 +121,8 @@
                 <button type="button" class="btn btn-light border shadow-sm rounded-3" data-bs-dismiss="modal">
                     <i class="fa-solid fa-xmark me-2"></i> Hủy
                 </button>
-                <button id="addCustomerBtn" type="submit" form="addCustomerForm" class="btn btn-primary shadow-sm rounded-3 disabled">
+                <button id="addCustomerBtn" type="submit" form="addCustomerForm"
+                        class="btn btn-primary shadow-sm rounded-3 disabled">
                     <i class="fa-solid fa-check me-2"></i> Lưu
                 </button>
             </div>
@@ -133,30 +136,49 @@
      aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="updateCustomerModalLabel">Sửa khách hàng</h5>
+            <!-- Header -->
+            <div class="modal-header bg-gradient bg-primary text-white">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="addTableModalLabel">
+                    🦸 Sửa thông tin khách hàng
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                        aria-label="Đóng"></button>
             </div>
 
-            <form class="row g-3 p-3" action="customer?action=update" method="post">
-                <input type="hidden" name="id" id="updateCustomerId">
-
-                <div class="mb-3 col-md-6">
-                    <label class="form-label">Tên khách hàng</label>
-                    <input type="text" name="name" id="updateCustomerName" class="form-control" required>
+            <!-- Body -->
+            <div class="modal-body">
+                <%--   spinner--%>
+                <div id="loadingSpinner" class="text-center py-2" style="display:none;">
+                    <div id="lottieLoading" style="width: 200px; height: 200px; margin: 0 auto;"></div>
                 </div>
 
-                <div class="mb-2 col-md-6">
-                    <label class="form-label">Số điện thoại</label>
-                    <input type="text" name="phone" id="updateCustomerPhone" class="form-control" required>
-                </div>
+                <form action="customer?action=update" method="post" id="updateCustomerForm">
+                    <input type="hidden" id="updateId" name="id">
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Tên khách hàng</label>
+                        <input id="updateName" type="text" name="name" class="form-control" required
+                               placeholder="Họ và tên...">
+                    </div>
 
-                <div class="col-md-12 d-flex justify-content-start mt-3">
-                    <button type="submit" class="btn btn-success me-2">💾 Lưu</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">↩ Hủy</button>
-                </div>
-            </form>
+                    <div class="mb-2">
+                        <label class="form-label" for="phone">Số điện thoại</label>
+                        <input id="updatePhone" type="text" name="phone" class="form-control" required
+                               placeholder="VD: 0912345678">
+                        <small id="phoneFeedbackUpdate" class="text-danger mt-1"></small>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer d-flex justify-content-end">
+                <button type="button" class="btn btn-light border shadow-sm rounded-3" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-xmark me-2"></i> Hủy
+                </button>
+                <button id="updateCustomerBtn" type="submit" form="updateCustomerForm"
+                        class="btn btn-primary shadow-sm rounded-3">
+                    <i class="fa-solid fa-check me-2"></i> Lưu
+                </button>
+            </div>
         </div>
     </div>
 </div>

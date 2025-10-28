@@ -1,5 +1,7 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.GsonBuilder;
+import com.qr_meal_web.enums.DiscountType;
 import com.qr_meal_web.model.Customer;
 import com.qr_meal_web.service.CustomerService;
 import com.qr_meal_web.service.impl.CustomerServiceImpl;
@@ -31,17 +33,9 @@ public class CustomerServlet extends HttpServlet {
             case "check-phone":
                 checkPhone(request, response);
                 break;
-            case "delete":
-                int deleteId = Integer.parseInt(request.getParameter("id"));
-                customerService.deleteCustomer(deleteId);
-                response.sendRedirect("customer");
-                break;
-            case "search":
-                String keyword = request.getParameter("keyword");
-                List<Customer> searchList = customerService.searchCustomers(keyword);
-                request.setAttribute("list", searchList);
-                request.getRequestDispatcher("views/customer.jsp").forward(request, response);
-                break;
+            case "get-customer":
+                getCustomerById(request, response);
+                return;
             default:
                 showListCustomer(request, response);
                 break;
@@ -56,22 +50,8 @@ public class CustomerServlet extends HttpServlet {
             case "create":
                 handleCreateCustomer(request, response);
                 break;
-            case "edit":
-                int id = Integer.parseInt(request.getParameter("id"));
-                Customer customer = customerService.getCustomerById(id);
-                request.setAttribute("customer", customer);
-                request.getRequestDispatcher("views/create.jsp").forward(request, response);
-                break;
-            case "delete":
-                int deleteId = Integer.parseInt(request.getParameter("id"));
-                customerService.deleteCustomer(deleteId);
-                response.sendRedirect("customer");
-                break;
-            case "search":
-                String keyword = request.getParameter("keyword");
-                List<Customer> searchList = customerService.searchCustomers(keyword);
-                request.setAttribute("list", searchList);
-                request.getRequestDispatcher("views/customer.jsp").forward(request, response);
+            case "update":
+                handleUpdateCustomer(request, response);
                 break;
             default:
                 showListCustomer(request, response);
@@ -84,8 +64,8 @@ public class CustomerServlet extends HttpServlet {
             page = Integer.parseInt(request.getParameter("page"));
         }
         List<Customer> customers = customerService.getAllCustomers(limit, page);
-        int totalOrders = customerService.getTotalQuantityCustomer();
-        int totalPages = (int) Math.ceil((double) totalOrders / limit);
+        int totalRecords = customerService.getTotalQuantityCustomer();
+        int totalPages = (int) Math.ceil((double) totalRecords / limit);
 
         int startPage = Math.max(1, page - visiblePages / 2);
         int endPage = Math.min(totalPages, startPage + visiblePages - 1);
@@ -120,6 +100,25 @@ public class CustomerServlet extends HttpServlet {
         response.getWriter().write("{\"exists\": " + exists + "}");
     }
 
+    private void getCustomerById(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String idStr = request.getParameter("id");
+        int id = Integer.parseInt(idStr);
+
+        Customer customer = customerService.getCustomerById(id);
+        response.setContentType("application/json; charset=UTF-8");
+        if (customer != null) {
+            new GsonBuilder().create().toJson(customer, response.getWriter());
+        } else {
+            response.getWriter().write("{\"error\": \"Không tìm thấy khách hàng\"}");
+        }
+    }
+
+    // Hàm escape ký tự đặc biệt trong JSON
+    private String escapeJson(String text) {
+        return text == null ? "" : text.replace("\"", "\\\"").replace("\n", "\\n");
+    }
+
     // ------- post --------
     private void handleCreateCustomer(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");
@@ -138,6 +137,30 @@ public class CustomerServlet extends HttpServlet {
             session.removeAttribute("cart");
         } else {
             session.setAttribute("message", "Thêm mới thất bại!");
+            session.setAttribute("status", "error");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/customer");
+    }
+
+    private void handleUpdateCustomer(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        String name = request.getParameter("name");
+        String phone = request.getParameter("phone");
+
+        Customer customer = new Customer();
+        customer.setId(id);
+        customer.setName(name);
+        customer.setPhone(phone);
+        customer.setPoints(0);
+
+        HttpSession session = request.getSession();
+        boolean isUpdated = customerService.updateCustomer(customer);
+        if (isUpdated) {
+            session.setAttribute("message", "Cập nhật thành công!!");
+            session.setAttribute("status", "success");
+        } else {
+            session.setAttribute("message", "Cập nhật thất bại!");
             session.setAttribute("status", "error");
         }
 
