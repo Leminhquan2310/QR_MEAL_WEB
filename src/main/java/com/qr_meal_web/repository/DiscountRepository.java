@@ -16,4 +16,6 @@ public interface DiscountRepository {
     boolean delete(int id);
 
     int getCountAllCustomer();
+
+    List<Discount> getDiscountsLessThanPhone(String phone);
 }

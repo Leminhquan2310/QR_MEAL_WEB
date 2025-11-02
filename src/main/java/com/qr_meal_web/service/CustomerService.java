@@ -20,7 +20,9 @@ public interface CustomerService {
 
     boolean isPhoneExist(String phone);
 
-    boolean addPoints(int customerId, int points);
+    boolean addPoints(String phone, int points);
+
+    boolean redeemPoints(String phone, int points);
 
     int getTotalQuantityCustomer();
 }

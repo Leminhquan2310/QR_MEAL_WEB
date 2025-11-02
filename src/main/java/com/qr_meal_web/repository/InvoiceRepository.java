@@ -10,4 +10,6 @@ public interface InvoiceRepository {
     double getTodayRevenue();
 
     int getTotalInvoiceToday();
+
+    boolean checkDiscountExisted(int discountId);
 }

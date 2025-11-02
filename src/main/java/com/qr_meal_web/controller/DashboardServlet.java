@@ -1,13 +1,17 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.qr_meal_web.model.Customer;
+import com.qr_meal_web.model.Discount;
 import com.qr_meal_web.model.Employee;
 import com.qr_meal_web.model.Table;
+import com.qr_meal_web.service.CustomerService;
 import com.qr_meal_web.service.InvoiceService;
 import com.qr_meal_web.service.OrderService;
 import com.qr_meal_web.service.TableService;
-import com.qr_meal_web.service.impl.InvoiceServiceImpl;
-import com.qr_meal_web.service.impl.OrderServiceImpl;
-import com.qr_meal_web.service.impl.TableServiceImpl;
+import com.qr_meal_web.service.impl.*;
+import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
@@ -29,7 +34,12 @@ public class DashboardServlet extends HttpServlet {
         String action = req.getParameter("action");
         if (action == null) action = "";
         switch (action) {
-            default -> showDashboardIndex(req, resp);
+            case "get-discounts-by-phone":
+                getDiscountsByPhone(req, resp);
+                break;
+            default:
+                showDashboardIndex(req, resp);
+                break;
         }
     }
 
@@ -43,6 +53,15 @@ public class DashboardServlet extends HttpServlet {
                 break;
             case "complete-order":
                 handleCompleteOrder(req, resp);
+                break;
+            case "create-customer":
+                BufferedReader reader = req.getReader();
+                CustomerService customerService = new CustomerServiceImpl();
+                Gson gson = new Gson();
+                Customer customer = gson.fromJson(reader, Customer.class);
+                boolean success = customerService.addCustomer(customer);
+                resp.setContentType("application/json");
+                resp.getWriter().write("{\"success\": " + success + "}");
                 break;
         }
     }
@@ -67,6 +86,16 @@ public class DashboardServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/manage/layout/layout.jsp").forward(request, response);
     }
 
+    private void getDiscountsByPhone(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        String phone = request.getParameter("phone");
+        List<Discount> discounts = new DiscountServiceImpl().getDiscountsLessThanPhone(phone);
+        String json = new GsonBuilder()
+                .create()
+                .toJson(discounts);
+        response.getWriter().print(json);
+    }
+
 //    post
 
     private void handleChangeOrderStatus(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
@@ -83,16 +112,19 @@ public class DashboardServlet extends HttpServlet {
             session.setAttribute("message", "Cập nhật thất bại - vui lòng thử lại!");
             session.setAttribute("status", "error");
         }
-        showDashboardIndex(request, response);
+        response.sendRedirect(request.getContextPath() + "/dashboard");
     }
 
     private void handleCompleteOrder(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
-        double discount = Double.parseDouble(request.getParameter("discount"));
+        String phone = request.getParameter("phone");
+        String pointOption = request.getParameter("pointOption");
+        int redeemSelect = Helper.parseIntegerSafe(request.getParameter("redeemSelect"), -1);
+        Discount discount = new DiscountServiceImpl().getById(redeemSelect);
         String paymentMethod = request.getParameter("paymentMethod");
         HttpSession session = request.getSession();
         Employee employee = (Employee) session.getAttribute("account");
-        boolean isSuccess = orderService.completeOrder(id, employee, discount, paymentMethod);
+        boolean isSuccess = orderService.completeOrder(id, phone, pointOption, discount, paymentMethod, employee);
         if (isSuccess) {
             session.setAttribute("message", "Cập nhật thành công!");
             session.setAttribute("status", "success");
@@ -100,6 +132,6 @@ public class DashboardServlet extends HttpServlet {
             session.setAttribute("message", "Cập nhật thất bại - vui lòng thử lại!");
             session.setAttribute("status", "error");
         }
-        showDashboardIndex(request, response);
+        response.sendRedirect(request.getContextPath() + "/dashboard");
     }
 }

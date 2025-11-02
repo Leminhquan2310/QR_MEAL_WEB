@@ -1,9 +1,6 @@
 package com.qr_meal_web.service;
 
-import com.qr_meal_web.model.Employee;
-import com.qr_meal_web.model.Order;
-import com.qr_meal_web.model.OrderDetail;
-import com.qr_meal_web.model.OrderStatusLog;
+import com.qr_meal_web.model.*;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -27,5 +24,5 @@ public interface OrderService {
 
     boolean changeOrderStatus(int orderId, int newStatus, Employee changedBy, String note);
 
-    boolean completeOrder(int orderId,  Employee employee, double discount, String paymentMethod);
+    boolean completeOrder(int orderId, String phone, String pointOption, Discount discount_id, String paymentMethod, Employee employee);
 }

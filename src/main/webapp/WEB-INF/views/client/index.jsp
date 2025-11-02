@@ -42,7 +42,7 @@
            class="category-btn ${empty param.category ? 'active' : ''}">Tất cả</a>
         <c:forEach var="c" items="${categories}">
             <a href="${pageContext.request.contextPath}/client?category=${c.id}"
-               class="category-btn ${param.category == c.id ? 'active' : ''}">${c.name}</a>
+               class="category-btn ${param.category == c.id ? 'active' : ''}">${c.icon} ${c.name}</a>
         </c:forEach>
     </div>
 

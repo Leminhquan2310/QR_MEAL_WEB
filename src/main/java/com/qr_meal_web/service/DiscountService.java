@@ -16,4 +16,6 @@ public interface DiscountService {
     boolean delete(int id);
 
     int getTotalQuantityDiscount();
+
+    List<Discount> getDiscountsLessThanPhone(String phone);
 }

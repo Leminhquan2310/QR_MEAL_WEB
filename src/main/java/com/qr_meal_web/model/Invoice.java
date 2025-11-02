@@ -12,12 +12,14 @@ public class Invoice {
     private double discount;
     private double final_amount;
     private PaymentMethod payment_method;
+    private int discount_id;
+    private int points_used;
     private Timestamp created_at;
 
     public Invoice() {
     }
 
-    public Invoice(int id, int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method, Timestamp created_at) {
+    public Invoice(int id, int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method,int discount_id, int points_used, Timestamp created_at) {
         this.id = id;
         this.order_id = order_id;
         this.employee_id = employee_id;
@@ -25,16 +27,20 @@ public class Invoice {
         this.discount = discount;
         this.final_amount = final_amount;
         this.payment_method = payment_method;
+        this.discount_id = discount_id;
+        this.points_used = points_used;
         this.created_at = created_at;
     }
 
-    public Invoice(int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method) {
+    public Invoice(int order_id, int employee_id, double total_amount, double discount, double final_amount, PaymentMethod payment_method, int discount_id, int points_used) {
         this.order_id = order_id;
         this.employee_id = employee_id;
         this.total_amount = total_amount;
         this.discount = discount;
         this.final_amount = final_amount;
         this.payment_method = payment_method;
+        this.discount_id = discount_id;
+        this.points_used = points_used;
     }
 
     public int getId() {
@@ -45,11 +51,11 @@ public class Invoice {
         this.id = id;
     }
 
-    public int getOrder_d() {
+    public int getOrder_id() {
         return order_id;
     }
 
-    public void setOrder_d(int order_id) {
+    public void setOrder_id(int order_id) {
         this.order_id = order_id;
     }
 
@@ -99,5 +105,21 @@ public class Invoice {
 
     public void setCreated_at(Timestamp created_at) {
         this.created_at = created_at;
+    }
+
+    public int getDiscount_id() {
+        return discount_id;
+    }
+
+    public void setDiscount_id(int discount_id) {
+        this.discount_id = discount_id;
+    }
+
+    public int getPoints_used() {
+        return points_used;
+    }
+
+    public void setPoints_used(int points_used) {
+        this.points_used = points_used;
     }
 }

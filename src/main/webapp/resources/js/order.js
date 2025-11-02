@@ -1,5 +1,14 @@
 const serveModal = new bootstrap.Modal(document.getElementById('serveModal'));
-const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+const inlineForm = document.getElementById("inlineCreateCustomer");
+const customerPhoneMain = document.getElementById("customerPhone");
+const customerPointFeedback = document.getElementById("pointFeedback");
+const discountForm = document.getElementById("discount-form");
+const spinner = document.getElementById("spinnerPhone");
+const btnConfirmPayment = document.getElementById("btnConfirmPayment");
+const vnPhoneRegex = /^(?:\+84|0)(?:3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/;
+const optionEarn = document.getElementById("optionEarn");
+const redeemContainer = document.getElementById("redeemContainer");
+
 
 function handleDelOrder(id) {
     Swal.fire({
@@ -186,225 +195,330 @@ function openServeModal() {
     serveModal.show();
 }
 
-// in phiếu chế biến
-async function fetchCookingTicket(orderId) {
-    try {
-        const response = await fetch(`/order?action=getCookingTicket&id=${orderId}`);
-        if (!response.ok) throw new Error("Không thể tải dữ liệu phiếu chế biến!");
-        return await response.json();
-    } catch (error) {
-        console.error(error);
-        alert("Lỗi khi tải dữ liệu phiếu chế biến!");
-        return null;
-    }
-}
-
-document.getElementById('btnPrint').addEventListener('click', async (event) => {
-    const orderId = event.currentTarget.dataset.id;
-    const data = await fetchCookingTicket(orderId);
-    if (!data) return;
-
-    const {order, items} = data;
-
-    // Dựng danh sách món ăn cho phiếu bếp
-    let itemsHtml = '';
-    items.forEach((item, idx) => {
-        itemsHtml += `
-            <tr>
-                <td style="text-align:center;">${idx + 1}</td>
-                <td>${item.product.name}</td>
-                <td style="text-align:center; font-weight:bold;">${item.quantity}</td>
-            </tr>`;
-    });
-
-    // Mở cửa sổ in
-    const printWindow = window.open('', '', 'width=600,height=800');
-    printWindow.document.write(`
-        <html>
-          <head>
-            <title>Phiếu chế biến</title>
-            <style>
-              * { font-family: 'Courier New', monospace; }
-              body { margin: 10px 15px; font-size: 14px; }
-              h2 {
-                text-align: center;
-                text-transform: uppercase;
-                margin: 4px 0;
-                font-size: 18px;
-                letter-spacing: 1px;
-              }
-              .header, .footer {
-                text-align: center;
-                font-size: 13px;
-              }
-              .order-info {
-                border: 1px dashed #999;
-                padding: 6px;
-                margin: 8px 0;
-                font-size: 13px;
-                line-height: 1.5;
-              }
-              table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 10px;
-              }
-              th, td {
-                border-bottom: 1px dashed #ccc;
-                padding: 6px 4px;
-              }
-              th {
-                background: #f3f3f3;
-                text-align: center;
-                text-transform: uppercase;
-                font-size: 13px;
-              }
-              td {
-                vertical-align: top;
-              }
-              tr:last-child td {
-                border-bottom: 2px solid #000;
-              }
-              .highlight {
-                background: #fff8dc;
-              }
-              @media print {
-                @page { size: 80mm auto; margin: 5mm; }
-                body { margin: 0; }
-              }
-            </style>
-          </head>
-          <body>
-            <h2>PHIẾU CHẾ BIẾN</h2>
-            <div class="header">--- Nhà hàng ABC ---</div>
-
-            <div class="order-info">
-              <div><b>Mã đơn:</b> #${order.id}</div>
-              <div><b>Bàn:</b> ${order.table_id}</div>
-              <div><b>Giờ tạo:</b> ${order.created_at}</div>
-            </div>
-
-            <table>
-              <thead>
-                <tr>
-                  <th style="width:10%">#</th>
-                  <th style="text-align:left;">Tên món</th>
-                  <th style="width:20%">SL</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${itemsHtml}
-              </tbody>
-            </table>
-
-            <div class="footer">
-              <hr>
-              <div>In lúc: ${new Date().toLocaleTimeString('vi-VN')}</div>
-              <div>Người in: ${order.staff_name || '---'}</div>
-            </div>
-          </body>
-        </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-});
-
 // Đóng đơn (chuyển sang trạng thái thanh toán)
 function closeOrder(id) {
     updateStatusOrder(id, "Hoàn thành chế biến?", "Chuyển sang trạng thái phục vụ - chờ thanh toán!", 2);
 }
 
-function confirmPayment(id, totalAmount, discount) {
-    Swal.fire({
-        title: 'Chọn phương thức thanh toán',
-        html: `
-                  <div style="text-align:left;">
-                    <div style="margin-bottom:8px;">
-                      <input type="radio" id="pay_cash" name="pay_method" value="cash" checked>
-                      <label for="pay_cash">Tiền mặt</label>
-                    </div>
-                    <div>
-                      <input type="radio" id="pay_transfer" name="pay_method" value="bank">
-                      <label for="pay_transfer">Chuyển khoản</label>
-                    </div>
-                  </div>
-                `,
-        showCancelButton: true,
-        confirmButtonText: 'Xác nhận',
-        cancelButtonText: 'Huỷ',
-        preConfirm: () => {
-            const checked = Swal.getPopup().querySelector('input[name="pay_method"]:checked');
-            if (!checked) {
-                Swal.showValidationMessage('Vui lòng chọn phương thức thanh toán');
-                return false;
-            }
-            return checked.value; // Trả về giá trị 'cash' hoặc 'transfer'
+async function openConfirmPaymentModal(id) {
+    const modalEl = document.getElementById("confirmPaymentModal");
+    const totalAmountSpan = document.getElementById("pm-total");
+    document.getElementById("orderId").value = id;
+    document.getElementById("confirmPaymentForm").reset();
+    document.getElementById("pointFeedback").textContent = "";
+    // set data hóa đơn
+    try {
+        const res = await fetch(`api/order-detail?action=by-order-id&id=${id}`);
+        const data = await res.json();
+        document.getElementById("pm-order-id").textContent = "#" + id;
+        document.getElementById("pm-order-table").textContent = "#" + data.order.table_id;
+        document.getElementById("pm-created-at").textContent = data.order.created_at;
+        let oDetailHtml = "";
+        let totalAmount = 0;
+        data.details.forEach((item, i) => {
+            totalAmount += item.quantity * item.price
+            oDetailHtml += `<tr>
+                                        <td>${item.product.name}</td>
+                                        <td class="text-center">${item.quantity}</td>
+                                        <td class="text-end">${item.price.toLocaleString('vi-VN')}đ</td>
+                                        <td class="text-end">${(item.quantity * item.price).toLocaleString('vi-VN')}đ</td>
+                                    </tr>`
+        });
+        document.getElementById("dataOrderDetail").innerHTML = oDetailHtml;
+        totalAmountSpan.innerText = totalAmount.toLocaleString('vi-VN') + "đ";
+        totalAmountSpan.dataset.totalAmount = totalAmount;
+        document.getElementById("pm-final").innerText = totalAmount.toLocaleString('vi-VN') + "đ";
+    } catch (err) {
+        console.error(err);
+        // spinner.style.display = "none";
+        // modalBody.innerHTML = `<tr><td colspan="6" class="text-danger text-center">Lỗi tải dữ liệu!</td></tr>`;
+    }
+    new bootstrap.Modal(modalEl).show();
+}
+
+const toggleFormAddCustomer = (e) => {
+    e.preventDefault();
+    const isOpen = inlineForm.style.display === "block";
+    if (isOpen) {
+        resetInlineForm();
+        return;
+    }
+
+    btnConfirmPayment.classList.add("disabled");
+    inlineForm.style.display = "block";
+    inlineForm.innerHTML = `
+            <h6 class="fw-bold mb-2">🦸 Thêm khách hàng mới</h6>
+            <div class="mb-2">
+                <label class="form-label">Tên khách hàng</label>
+                <input type="text" id="newCustomerName" class="form-control" placeholder="Họ và tên..." required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input type="text" id="newCustomerPhone" class="form-control" placeholder="VD: 0912345678" required>
+                <small id="createFeedback" class="text-danger small"></small>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" onclick="cancelFormAddCustomer()" class="btn btn-secondary btn-sm">Huỷ</button>
+                <button type="button" id="saveCreateCustomer" class="btn btn-primary btn-sm">Lưu</button>
+            </div>`;
+
+    // --- Gắn sự kiện cho các input ---
+    const nameInput = inlineForm.querySelector("#newCustomerName");
+    const phoneInput = inlineForm.querySelector("#newCustomerPhone");
+    const feedback = inlineForm.querySelector("#createFeedback");
+    const saveBtn = inlineForm.querySelector("#saveCreateCustomer");
+
+    // Kiểm tra số điện thoại khi nhập
+    phoneInput.addEventListener("input", debounce(async e => {
+        const phone = e.target.value.trim();
+        feedback.textContent = "";
+
+        if (!vnPhoneRegex.test(phone)) {
+            feedback.textContent = "❌ Số điện thoại không hợp lệ (VD: 0912345678)";
+            phoneInput.classList.add("is-invalid");
+            return;
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            const paymentMethod = result.value;
-            const form = document.createElement("form");
-            form.method = "POST";
-            form.action = `/order?action=complete-order`;
 
-            let inputData = {id, totalAmount, discount, paymentMethod}
-            for (let key in inputData) {
-                const input = document.createElement("input");
-                input.type = "hidden";
-                input.name = key;
-                input.value = inputData[key];
-                form.appendChild(input);
+        try {
+            const res = await fetch(`customer?action=check-phone&phone=${encodeURIComponent(phone)}`);
+            const data = await res.json();
+
+            if (data.exists) {
+                feedback.textContent = "⚠️ Số điện thoại đã tồn tại!";
+                phoneInput.classList.add("is-invalid");
+            } else {
+                feedback.textContent = "";
+                phoneInput.classList.remove("is-invalid");
             }
+        } catch {
+            console.error("Lỗi khi kiểm tra SĐT");
+        }
+    }, 500));
 
-            //
-            // const inputAmount = document.createElement("input");
-            // inputAmount.type = "hidden";
-            // inputAmount.name = "totalAmount";
-            // inputAmount.value = totalAmount;
-            // form.appendChild(inputAmount);
-            //
-            // const inputDiscount = document.createElement("input");
-            // inputDiscount.type = "hidden";
-            // inputDiscount.name = "discount";
-            // inputDiscount.value = discount;
-            // form.appendChild(inputDiscount);
+    // Lưu khách hàng
+    saveBtn.addEventListener("click", async () => {
+        const name = nameInput.value.trim();
+        const phone = phoneInput.value.trim();
 
-            document.body.appendChild(form);
-            form.submit();
+        if (!name || !phone) {
+            feedback.textContent = "⚠️ Vui lòng nhập đầy đủ thông tin!";
+            return;
+        }
+
+        if (!vnPhoneRegex.test(phone)) {
+            feedback.textContent = "❌ Số điện thoại không hợp lệ!";
+            return;
+        }
+
+        try {
+            const res = await fetch("dashboard?action=create-customer", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({name, phone})
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire("🎉 Thành công!", "Thêm khách hàng thành công!", "success");
+                customerPhoneMain.value = phone;
+                resetInlineForm();
+            } else {
+                feedback.textContent = data.message || "⚠️ Số điện thoại đã tồn tại!";
+            }
+        } catch {
+            Swal.fire("Lỗi!", "Không thể kết nối tới server!", "error");
         }
     });
 }
 
-// Mở modal và load thông tin đơn
-function openPaymentModal(orderId) {
-    paymentModal.show();
-    getInfoQRPayment(orderId);
+const resetInlineForm = () => {
+    inlineForm.style.display = "none";
+    inlineForm.innerHTML = "";
+    btnConfirmPayment.classList.remove("disabled");
+    document.getElementById('qrSection').style.display = "none";
 }
 
-// fetch lấy thông tin "QR code" thanh toán
-function getInfoQRPayment(orderId) {
-    let imgElement = document.getElementById('qrSection').querySelector("img");
-    let priceText = document.getElementById('pm-total').innerHTML;
-    let totalAmount = parseInt(priceText.replace(/[^\d]/g, ''), 10);
-    let order_code = document.getElementById('pm-order-id').innerHTML;
-    if (!imgElement.getAttribute('src')) {
-        fetch(`/order?action=get-payment-info`)
-            .then(res => res.json())
-            .then(data => {
-                let bank = data.bankAccount;
-                let src = `https://img.vietqr.io/image/${bank.bank_code}-${bank.account_number}-qr_only.png?amount=${totalAmount}&addInfo=ORDER ${orderId}&accountName=${bank.account_name}`
-                imgElement.src = src;
-            }).catch(res => {
-            console.log(res)
-        })
+
+const cancelFormAddCustomer = () => {
+    document.getElementById("inlineCreateCustomer").style.display = "none";
+    document.getElementById("inlineCreateCustomer").innerHTML = "";
+    btnConfirmPayment.classList.remove("disabled");
+}
+
+const showInvalidPhone = () => {
+    customerPointFeedback.textContent = "❌ Số điện thoại không hợp lệ (VD: 0912345678)";
+    customerPhoneMain.classList.add("is-invalid");
+    spinner.style.display = "none";
+    discountForm.style.display = "none";
+}
+
+const onInputCustomerPhone = debounce(e => {
+    spinner.style.display = "block";
+    checkPhoneDiscount(e.target.value.trim());
+}, 300);
+
+// --- Kiểm tra số điện thoại để hiển thị form tích điểm / giảm giá ---
+const checkPhoneDiscount = debounce(async phone => {
+    if (!phone) {
+        resetPhoneFeedback();
+        return;
+    }
+
+    if (!vnPhoneRegex.test(phone)) {
+        showInvalidPhone();
+        return;
+    }
+
+    try {
+        const res = await fetch(`customer?action=check-phone&phone=${encodeURIComponent(phone)}`);
+        const data = await res.json();
+
+        spinner.style.display = "none";
+        if (data.exists) {
+            discountForm.style.display = "block";
+            customerPhoneMain.classList.remove("is-invalid");
+            customerPointFeedback.textContent = "";
+            document.getElementById("optionEarn").checked = true;
+            document.getElementById("optionEarn").dispatchEvent(new Event("change"));
+        } else {
+            showNotExistPhone();
+        }
+    } catch {
+        console.error("Lỗi khi kiểm tra SĐT");
+    }
+}, 700);
+
+const resetPhoneFeedback = () => {
+    spinner.style.display = "none";
+    customerPhoneMain.classList.remove("is-invalid");
+    customerPointFeedback.textContent = "";
+    discountForm.style.display = "none";
+}
+
+const showNotExistPhone = () => {
+    customerPointFeedback.textContent = "⚠️ Số điện thoại không tồn tại!";
+    customerPhoneMain.classList.add("is-invalid");
+    discountForm.style.display = "none";
+}
+
+const onChangePaymentMethodRadio = (e) => {
+    const qrSection = document.getElementById('qrSection');
+    if (e.target.value === 'bank') {
+        qrSection.style.display = 'block';
+    } else {
+        qrSection.style.display = 'none';
     }
 }
 
-//In hóa đơn
-document.getElementById('btnPrintPayment').addEventListener('click', async (e) => {
-    const printContent = document.getElementById("pm-bill").innerHTML;
+const onChangeEarnOption = () => {
+    redeemContainer.style.display = "none";
+    const totalAmount = parseInt(document.getElementById("pm-total").dataset.totalAmount);
+    const totalFinal = document.getElementById("pm-final");
+    document.getElementById("pm-discount").innerText = "0₫";
+    totalFinal.innerText = totalAmount.toLocaleString('vi-VN') + "₫";
+    totalFinal.dataset.totalFinal = totalAmount;
+    resetQrSection();
+}
+
+const onChangeRedeemOption = async () => {
+    try {
+        const res = await fetch(`/dashboard?action=get-discounts-by-phone&phone=${encodeURIComponent(customerPhoneMain.value)}`);
+        const data = await res.json();
+        if (data.length > 0) {
+            redeemContainer.innerHTML = `
+                    <label for="redeemSelect" class="form-label">Chọn mức giảm giá</label>
+                    <select id="redeemSelect" onchange="changeSelectDiscount()" name="redeemSelect" class="form-select">
+                        ${data.map(item => `<option value="${item.id}" data-value="${item.discount_value}" data-type="${item.discount_type}">
+                                                                (${item.points_required} điểm) - ${item.description}
+                                                              </option>`).join("")}
+                    </select>`;
+            changeSelectDiscount();
+        } else {
+            optionEarn.checked = true;
+            redeemContainer.innerHTML = `<div id="discountFeedback" class="form-text text-muted mt-1">Chưa đủ điểm để giảm giá!</div>`;
+        }
+
+        redeemContainer.style.display = "block";
+    } catch (err) {
+        console.error("Lỗi khi lấy giảm giá:", err);
+    }
+}
+
+const resetQrSection = () => {
+    const qrSection = document.getElementById('qr_content');
+    qrSection.innerHTML = `<div id="qrLoading" class="d-flex align-items-center justify-content-center h-100 d-none">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                              </div>
+                                              <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid d-none"
+                                                     style="width: 150px;">
+                                               <span id="btnGenerateQR" class="text-primary small fw-semibold" role="button"
+                                                      style="cursor: pointer;" onclick="createQRCodeClick()">
+                                                    <i class="fa fa-qrcode me-1"></i> Tạo QR Code
+                                                </span>`
+}
+
+
+const changeSelectDiscount = () => {
+    const totalAmount = parseInt(document.getElementById("pm-total").dataset.totalAmount);
+    const totalFinal = document.getElementById("pm-final");
+    const selectedOption = redeemSelect.selectedOptions[0];
+    const discountType = selectedOption.dataset.type;
+    let discountValue = parseInt(selectedOption.dataset.value);
+    let finalAmount = Math.max(totalAmount - discountValue, 0);
+    if (discountType === "PERCENT") {
+        finalAmount = totalAmount - totalAmount / 100 * discountValue;
+        discountValue = totalAmount - finalAmount
+    }
+
+    // Cập nhật hiển thị
+    document.getElementById("pm-discount").innerText = discountValue.toLocaleString('vi-VN') + "₫";
+    totalFinal.innerText = finalAmount.toLocaleString('vi-VN') + "₫";
+    totalFinal.dataset.totalFinal = finalAmount;
+    resetQrSection();
+}
+
+// Sự kiện click nút tạo QR
+const createQRCodeClick = () => {
+    const totalFinal = document.getElementById("pm-final").dataset.totalFinal;
+    const id = document.getElementById("orderId").value;
+    refreshQrCodePayment(id, totalFinal);
+}
+
+
+// fetch lấy thông tin "QR code" thanh toán
+const refreshQrCodePayment = (orderId, amount) => {
+    const qrImage = document.getElementById('qrCodeImage');
+    const qrLoading = document.getElementById('qrLoading');
+    const btnGenerate = document.getElementById('btnGenerateQR');
+
+    // Ẩn nút, hiện loading
+    btnGenerate.classList.add('d-none');
+    qrLoading.classList.remove('d-none');
+
+    let qrUrl = '';
+    fetch(`/order?action=get-payment-info`)
+        .then(res => res.json())
+        .then(data => {
+            let bank = data.bankAccount;
+            qrUrl = `https://img.vietqr.io/image/${bank.bank_code}-${bank.account_number}-qr_only.png?amount=${amount}&addInfo=ORDER ${orderId}&accountName=${bank.account_name}`
+            qrImage.src = qrUrl;
+        }).catch(res => {
+        console.log(res)
+    })
+
+    // Giả lập load QR sau 1.5 giây
+    setTimeout(() => {
+        qrLoading.classList.add('d-none');
+        qrImage.classList.remove('d-none');
+    }, 1000);
+}
+
+
+// in hóa đơn
+const printBill = () => {
+    const printContent = document.getElementById("billPreview").innerHTML;
     // Mở cửa sổ in
     const printWindow = window.open('', '', 'width=600,height=800');
     printWindow.document.write(`<html lang="en">
@@ -415,7 +529,7 @@ document.getElementById('btnPrintPayment').addEventListener('click', async (e) =
                                                             @media print {
                                                                 body {
                                                                     width: 58mm;
-                                                                    font-size: 12px;
+                                                                    font-size: 10px;
                                                                     line-height: 1.4;
                                                                 }
                                                                 .no-print {
@@ -430,7 +544,9 @@ document.getElementById('btnPrintPayment').addEventListener('click', async (e) =
                                                             </style>
                                                             </head>
                                                                 <body>
-                                                                       ${printContent}
+                                                                       <div class="col-md-6 border rounded p-3 bg-light" id="billPreview" style="min-height: 320px;">
+                                                                            ${printContent}
+                                                                       </div>
                                                                 </body>
                                                        </html>`);
     printWindow.document.close();
@@ -454,4 +570,4 @@ document.getElementById('btnPrintPayment').addEventListener('click', async (e) =
             };
         }
     }, 300);
-});
+}

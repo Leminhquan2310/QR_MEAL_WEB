@@ -55,13 +55,13 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="dashboard" class="${pageActive == 'dashboard' ? 'active' : ''}">📊 Dashboard</a>
-        <a href="employee?page=1" class="${pageActive == 'employee' ? 'active' : ''}">👤 Quản lý nhân viên</a>
-        <a href="customer?page=1" class="${pageActive == 'customer' ? 'active' : ''}">🦸 Quản lý khách hàng</a>
-        <a href="table?page=1" class="${pageActive == 'table' ? 'active' : ''}">🪟 Quản lý bàn</a>
+        <a href="employee?page=1" class="${pageActive == 'employee' ? 'active' : ''}">👤 Nhân viên</a>
+        <a href="customer?page=1" class="${pageActive == 'customer' ? 'active' : ''}">🦸 Khách hàng</a>
+        <a href="table?page=1" class="${pageActive == 'table' ? 'active' : ''}">🪟 Bàn</a>
         <a href="product?page=1" class="${pageActive == 'product' ? 'active' : ''}">🍜 Sản phẩm</a>
-        <a href="category?page=1" class="${pageActive == 'category' ? 'active' : ''}">🥗 Phân loại sản phẩm</a>
+        <a href="category?page=1" class="${pageActive == 'category' ? 'active' : ''}">🥗 Loại sản phẩm</a>
         <a href="menu.jsp?page=1" class="${pageActive == 'menu' ? 'active' : ''}">📋 Menu</a>
-        <a href="discount?page=1" class="${pageActive == 'discount' ? 'active' : ''}">🎁 Quản lý giảm giá</a>
+        <a href="discount?page=1" class="${pageActive == 'discount' ? 'active' : ''}">🎁 Giảm giá</a>
         <a href="order?page=1" class="${pageActive == 'order' ? 'active' : ''}">🧾 Đơn hàng</a>
         <a href="setting" class="${pageActive == 'setting' ? 'active' : ''}">⚙️ Cấu hình</a>
     </div>
@@ -81,6 +81,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.10.2/lottie.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/resources/js/utils/debounce.js"></script>
 <script src="${pageJs}"></script>
 </body>
 </html>

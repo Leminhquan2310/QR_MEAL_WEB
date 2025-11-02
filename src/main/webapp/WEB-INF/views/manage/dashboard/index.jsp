@@ -119,53 +119,175 @@
 
 <!-- Modal xác nhận thanh toán -->
 <div class="modal fade" id="confirmPaymentModal" tabindex="-1" aria-labelledby="confirmPaymentLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-warning text-white">
                 <h5 class="modal-title" id="confirmPaymentLabel">Xác nhận thanh toán</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Đóng"></button>
             </div>
-            <form id="confirmPaymentForm" method="POST" action="/dashboard?action=complete-order">
-                <div class="modal-body">
-
-                    <!-- Nhập số điện thoại khách hàng -->
-                    <div class="mb-3">
-                        <label for="customerPhone" class="form-label">Số điện thoại khách hàng</label>
-                        <input type="text" id="customerPhone" name="phone" class="form-control" placeholder="Nhập SĐT để tích điểm" required pattern="^(0|\+84)\d{9}$">
-                        <div class="form-text">Dùng để tích điểm hoặc giảm giá nếu có.</div>
-                        <div id="pointFeedback" class="text-success small mt-1"></div>
-                    </div>
-
-                    <!-- Chọn phương thức thanh toán -->
-                    <div class="mb-3">
-                        <label class="form-label">Phương thức thanh toán</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="pay_cash" value="cash" checked>
-                            <label class="form-check-label" for="pay_cash">Tiền mặt</label>
+            <div class="modal-body">
+                <div class="row">
+                    <form class="col-md-6" id="confirmPaymentForm" method="POST"
+                          action="/dashboard?action=complete-order">
+                        <!-- Nhập số điện thoại khách hàng -->
+                        <div class="mb-3 position-relative">
+                            <label for="customerPhone" class="mb-2 fw-bold">
+                                Số điện thoại khách hàng
+                                <a onclick="toggleFormAddCustomer(event)" id="toggleCreateCustomer" class="text-decoration-none ms-2" href="#">Tạo mới</a>
+                            </label>
+                            <input type="text" id="customerPhone" name="phone" class="form-control"
+                                   placeholder="Dùng để tích điểm hoặc giảm giá nếu có."
+                                   style="background-image: none !important;" oninput="onInputCustomerPhone(event)">
+                            <div id="spinnerPhone" class="position-absolute end-0 translate-middle-y me-3"
+                                 style="display:none; top: 50px">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <div id="pointFeedback" class="text-danger small mt-1"></div>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="pay_transfer" value="bank">
-                            <label class="form-check-label" for="pay_transfer">Chuyển khoản</label>
+
+                        <!-- Form thêm khách hàng ẩn -->
+                        <div id="inlineCreateCustomer" class="p-3 border rounded bg-light shadow-sm"
+                             style="display:none;">
+
+                        </div>
+
+                        <!-- Chọn phương thức thanh toán -->
+                        <div class="mb-3">
+                            <label class="mb-2 fw-bold">Phương thức thanh toán</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="pay_cash"
+                                       value="cash" onchange="onChangePaymentMethodRadio(event)" checked>
+                                <label class="form-check-label" for="pay_cash">Tiền mặt</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="pay_transfer"
+                                       value="bank" onchange="onChangePaymentMethodRadio(event)">
+                                <label class="form-check-label" for="pay_transfer">Chuyển khoản</label>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn tích điểm hoặc đổi điểm -->
+                        <div class="mb-3" id="discount-form" style="display: none">
+                            <label class="mb-2 fw-bold">Chọn hình thức điểm thưởng</label>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="pointOption" id="optionEarn"
+                                       value="earn" onchange="onChangeEarnOption()"
+                                       checked>
+                                <label class="form-check-label" for="optionEarn">
+                                    Tích điểm (cộng điểm sau thanh toán)
+                                </label>
+                            </div>
+
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="radio" name="pointOption" id="optionRedeem"
+                                       value="redeem" onchange="onChangeRedeemOption()">
+                                <label class="form-check-label" for="optionRedeem">
+                                    Đổi điểm để giảm giá
+                                </label>
+                            </div>
+
+                            <!-- Chỉ hiện khi chọn “Đổi điểm” -->
+                            <div id="redeemContainer" class="mt-3" style="display:none;">
+                                <%-- Hiển thị các dữ liệu giảm giá --%>
+                            </div>
+                        </div>
+
+                        <!-- Hidden input -->
+                        <input type="hidden" id="orderId" name="id">
+                    </form>
+
+                    <%-- Hóa đơn thanh toán--%>
+                    <div class="col-md-6 border rounded p-3 bg-light" id="billPreview" style="min-height: 320px;">
+                        <h6 class="fw-semibold text-center mb-2">
+                            <i class="fa-solid fa-receipt me-1"></i> Hóa đơn thanh toán
+                        </h6>
+                        <div class="d-flex justify-content-between">
+                            <span><strong>Mã đơn:</strong></span>
+                            <span id="pm-order-id"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><strong>Bàn:</strong></span>
+                            <span id="pm-order-table"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span><strong>Ngày tạo:</strong></span>
+                            <span id="pm-created-at"></span>
+                        </div>
+                        <hr class="my-2">
+                        <div>
+                            <strong>Chi tiết món:</strong>
+                            <table class="table table-sm table-borderless align-middle small mt-1 mb-2"
+                                   id="pm-items">
+                                <thead class="border-bottom">
+                                <tr class="text-secondary">
+                                    <th>Tên món</th>
+                                    <th class="text-center" style="width:60px;">SL</th>
+                                    <th class="text-end" style="width:100px;">Đơn giá</th>
+                                    <th class="text-end" style="width:100px;">Thành tiền</th>
+                                </tr>
+                                </thead>
+                                <tbody id="dataOrderDetail">
+                                </tbody>
+                            </table>
+                        </div>
+                        <hr class="my-2">
+                        <div>
+                            <div class="d-flex justify-content-between">
+                                <strong>Tổng tiền:</strong>
+                                <span id="pm-total" class="fw-bold text-secondary">0 ₫</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Giảm giá:</span>
+                                <span id="pm-discount" class="text-success">0 ₫</span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-2 border-top pt-2">
+                                <strong>Tổng thanh toán:</strong>
+                                <strong id="pm-final" class="fw-bold text-danger">0 ₫</strong>
+                            </div>
+                        </div>
+
+                        <!-- QR hiển thị nếu chọn -->
+                        <div id="qrSection" class="mt-3 text-center" style="display: none;">
+                            <div class="d-inline-block p-3 border border-3 border-muted rounded-3 bg-white shadow-sm"
+                                 id="qr_content" style="min-width: 160px; min-height: 50px; position: relative;">
+
+                                <!-- Spinner hiển thị khi đang load -->
+                                <div id="qrLoading"
+                                     class="d-flex align-items-center justify-content-center h-100 d-none">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+
+                                <!-- Ảnh QR -->
+                                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid d-none"
+                                     style="width: 150px;">
+
+                                <!-- Dòng tạo QR Code -->
+                                <span id="btnGenerateQR" onclick="createQRCodeClick()"
+                                      class="text-primary small fw-semibold" role="button"
+                                      style="cursor: pointer;">
+                                    <i class="fa fa-qrcode me-1"></i> Tạo QR Code
+                                </span>
+                            </div>
+                            <p class="text-muted mt-2 mb-0 small">Quét mã để thanh toán nhanh</p>
                         </div>
                     </div>
-
-                    <!-- Dùng điểm để giảm giá -->
-                    <div class="mb-3">
-                        <label for="usePoints" class="form-label">Dùng điểm để giảm giá (nếu có)</label>
-                        <input type="number" id="usePoints" name="usePoints" class="form-control" placeholder="Nhập số điểm muốn sử dụng" min="0">
-                        <div id="discountFeedback" class="form-text text-muted"></div>
-                    </div>
-
-                    <!-- Hidden input -->
-                    <input type="hidden" id="orderId" name="id">
-                    <input type="hidden" id="orderDiscount" name="discount">
-
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
-                    <button type="submit" class="btn btn-primary">Xác nhận</button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                <button id="printBtn" class="btn btn-primary" onclick="printBill()">🖨️ In hóa đơn</button>
+                <button type="submit" class="btn btn-warning" id="btnConfirmPayment" form="confirmPaymentForm">
+                    Xác nhận
+                </button>
+            </div>
         </div>
     </div>
 </div>

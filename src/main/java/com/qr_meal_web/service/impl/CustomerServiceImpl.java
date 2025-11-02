@@ -56,10 +56,19 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public boolean addPoints(int customerId, int points) {
-        Customer customer = getCustomerById(customerId);
+    public boolean addPoints(String phone, int points) {
+        Customer customer = customerRepository.findByPhone(phone);
         if (customer == null) return false;
         int newPoints = customer.getPoints() + points;
+        customer.setPoints(newPoints);
+        return updateCustomer(customer);
+    }
+
+    @Override
+    public boolean redeemPoints(String phone, int points) {
+        Customer customer = customerRepository.findByPhone(phone);
+        if (customer == null) return false;
+        int newPoints = customer.getPoints() - points;
         customer.setPoints(newPoints);
         return updateCustomer(customer);
     }

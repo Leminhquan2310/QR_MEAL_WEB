@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
             Swal.fire({
                 title: 'Xóa giảm giá?',
-                text: "Xóa sẽ dừng sử dụng loại giảm giá này!",
+                text: "Xóa sẽ dừng sử dụng loại giảm giá này hoặc xóa hẳn nếu chưa sử dụng!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -29,6 +29,10 @@ function resetModal() {
     document.getElementById('discountId').value = '';
     document.getElementById('discountPoints').value = '';
     document.getElementById('discountDescription').value = '';
+    document.getElementById('discountType').value = 'PERCENT';
+    document.getElementById('discountValue').value = '';
+    document.getElementById('discountStatus').value = 1;
+    document.getElementById('discountStatus').checked = true;
 }
 
 function editDiscount(id, points_required, description, discount_value, discount_type, staus) {
@@ -63,7 +67,7 @@ document.getElementById('discountStatus').addEventListener('change', function ()
     toggle.addEventListener('change', () => {
         label.style.opacity = 0;
         setTimeout(() => {
-            label.textContent = toggle.checked ? 'Hoạt động' : 'Không hoạt động';
+            label.textContent = toggle.checked ? 'Hoạt động' : 'Ngưng hoạt động';
             label.style.opacity = 1;
         }, 150);
     });

@@ -82,4 +82,21 @@ public class Discount {
     public void setStatus(DiscountStatus status) {
         this.status = status;
     }
+
+    public double calculateDiscountAmount(double totalAmount) {
+        switch (discount_type) {
+            case PERCENT:
+                return totalAmount * (discount_value / 100.0);
+
+            case FIXED:
+                return Math.min(discount_value, totalAmount); // tránh giảm quá tổng tiền
+            default:
+                return 0;
+        }
+    }
+
+    public double calculateFinalAmount(double totalAmount) {
+        double discountAmount = calculateDiscountAmount(totalAmount);
+        return Math.max(totalAmount - discountAmount, 0); // tránh âm
+    }
 }

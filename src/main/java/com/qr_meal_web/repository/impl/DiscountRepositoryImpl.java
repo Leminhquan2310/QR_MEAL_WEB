@@ -18,8 +18,9 @@ public class DiscountRepositoryImpl implements DiscountRepository {
     private final String SELECT_ONE = "SELECT * FROM discount WHERE id=?";
     private final String CREATE = "INSERT INTO discount(points_required, description, discount_value, discount_type) VALUES (?, ?, ?, ?)";
     private final String UPDATE = "UPDATE discount SET points_required=?, description=?, discount_value = ?,  discount_type = ?, status = ? WHERE id=?";
-    private final String DELETE = "UPDATE discount SET status = 0 WHERE id=?";
+    private final String DELETE = "DELETE FROM discount WHERE id=?";
     private final String SEARCH_COUNT_TOTAL = "SELECT count(*) AS count_total FROM discount";
+    private final String SELECT_LESS_THAN_PHONE = "SELECT d.* FROM discount d JOIN customer c ON c.points >= d.points_required WHERE d.status = 1 AND c.phone = ?";
 
     @Override
     public List<Discount> getAll(int limit, int offset) {
@@ -110,6 +111,23 @@ public class DiscountRepositoryImpl implements DiscountRepository {
             System.err.println("Find all customers error: " + e.getMessage());
         }
         return result;
+    }
+
+    @Override
+    public List<Discount> getDiscountsLessThanPhone(String phone) {
+        List<Discount> discounts = new ArrayList<>();
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_LESS_THAN_PHONE)) {
+            ps.setString(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    discounts.add(mapToDiscount(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Find all customers error: " + e.getMessage());
+        }
+        return discounts;
     }
 
     private Discount mapToDiscount(ResultSet resultSet) throws SQLException {

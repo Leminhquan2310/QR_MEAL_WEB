@@ -34,6 +34,9 @@ public class APIOrderDetailServlet extends HttpServlet {
             case "by-table-id":
                 getOrderDetailByTableId(req, resp);
                 break;
+            case "by-order-id":
+                getOrderDetailByOrderId(req, resp);
+                break;
         }
     }
 
@@ -41,6 +44,32 @@ public class APIOrderDetailServlet extends HttpServlet {
         int id = Integer.parseInt(request.getParameter("id"));
         Order order = orderService.selectOrderByTableIdAvailable(id);
         List<OrderDetail> details = orderDetailService.selectOrderDetailByTableId(id);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("order", order);
+        result.put("details", details);
+
+        response.setContentType("application/json; charset=UTF-8");
+        new GsonBuilder()
+                .registerTypeAdapter(OrderStatus.class, new JsonSerializer<OrderStatus>() {
+                    @Override
+                    public JsonElement serialize(OrderStatus status, Type typeOfSrc, JsonSerializationContext context) {
+                        JsonObject obj = new JsonObject();
+                        obj.addProperty("code", status.getCode());
+                        obj.addProperty("label", status.getLabel());
+                        obj.addProperty("badge", status.getBadge());
+                        return obj;
+                    }
+                })
+                .setDateFormat("yyyy-MM-dd HH:mm:ss")
+                .create()
+                .toJson(result, response.getWriter());
+    }
+
+    private void getOrderDetailByOrderId(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Order order = orderService.selectOrderById(id);
+        List<OrderDetail> details = orderDetailService.selectOrderDetailByOrderId(id);
 
         Map<String, Object> result = new HashMap<>();
         result.put("order", order);

@@ -27,26 +27,13 @@ public class DiscountServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setAttribute("pageActive", "discount");
         String action = req.getParameter("action");
         if (action == null) action = "";
         switch (action) {
             default:
                 showListDiscount(req, resp);
         }
-//        switch (action) {
-//            case "create":
-//                showCreateForm(request, response);
-//                break;
-//            case "check-phone":
-//                checkPhone(request, response);
-//                break;
-//            case "get-customer":
-//                getCustomerById(request, response);
-//                return;
-//            default:
-//                showListCustomer(request, response);
-//                break;
-//        }
     }
 
     @Override

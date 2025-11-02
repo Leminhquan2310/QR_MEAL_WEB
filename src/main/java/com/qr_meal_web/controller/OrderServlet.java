@@ -7,10 +7,7 @@ import com.qr_meal_web.service.CartService;
 import com.qr_meal_web.service.InvoiceService;
 import com.qr_meal_web.service.OrderDetailService;
 import com.qr_meal_web.service.OrderService;
-import com.qr_meal_web.service.impl.BankAccountServiceImpl;
-import com.qr_meal_web.service.impl.InvoiceServiceImpl;
-import com.qr_meal_web.service.impl.OrderDetailServiceImpl;
-import com.qr_meal_web.service.impl.OrderServiceImpl;
+import com.qr_meal_web.service.impl.*;
 import com.qr_meal_web.util.Helper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -261,11 +258,14 @@ public class OrderServlet extends HttpServlet {
 
     private void handleCompleteOrder(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         int id = Integer.parseInt(request.getParameter("id"));
-        double discount = Double.parseDouble(request.getParameter("discount"));
+        String phone = request.getParameter("phone");
+        String pointOption = request.getParameter("pointOption");
+        int redeemSelect = Helper.parseIntegerSafe(request.getParameter("redeemSelect"), -1);
+        Discount discount = new DiscountServiceImpl().getById(redeemSelect);
         String paymentMethod = request.getParameter("paymentMethod");
         HttpSession session = request.getSession();
         Employee employee = (Employee) session.getAttribute("account");
-        boolean isSuccess = orderService.completeOrder(id, employee, discount, paymentMethod);
+        boolean isSuccess = orderService.completeOrder(id, phone, pointOption, discount, paymentMethod, employee);
         if (isSuccess) {
             session.setAttribute("message", "Cập nhật thành công!");
             session.setAttribute("status", "success");

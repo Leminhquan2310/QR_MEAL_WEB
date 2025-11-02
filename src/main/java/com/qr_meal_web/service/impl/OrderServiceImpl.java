@@ -203,7 +203,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public boolean completeOrder(int orderId, Employee employee, double discount, String paymentMethod) {
+    public boolean completeOrder(int orderId, String phone, String pointOption, Discount discount, String paymentMethod, Employee employee) {
         InvoiceService invoiceService = new InvoiceServiceImpl();
         Connection connection = null;
         try {
@@ -231,7 +231,9 @@ public class OrderServiceImpl implements OrderService {
             tableRepository.updateTableStatus(connection, order.getTable_id(), newTableStatus.getCode());
 
             // 5. Tạo hóa đơn
-            invoiceService.createInvoice(connection, orderId, employee.getId(), discount, paymentMethod);
+            invoiceService.createInvoice(connection, orderId, employee.getId(), discount, paymentMethod, pointOption, phone);
+
+            // 6. tích điểm hoặc đổi discount
 
             // ✅ Commit toàn bộ transaction
             connection.commit();

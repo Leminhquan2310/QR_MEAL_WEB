@@ -3,7 +3,7 @@
 <!-- Header -->
 <nav class="navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand">🍽️ iRestaurant</a>
+        <a class="navbar-brand">🍽️ QUẢN LÝ ABC</a>
         <div class="d-flex align-items-center">
             <div class="account-info me-3 text-end">
                 <div class="role">Xin chào, <span class=""><c:out value="${sessionScope.account.role.name}" /></span></div>
