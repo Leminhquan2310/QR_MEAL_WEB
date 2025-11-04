@@ -10,6 +10,8 @@ import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @WebServlet(name = "ClientServlet", urlPatterns = "/client")
 public class ClientServlet extends HttpServlet {
@@ -35,12 +37,9 @@ public class ClientServlet extends HttpServlet {
             default:
                 break;
         }
-//        resp.sendRedirect("/client");
     }
 
-    private void showHomePage(HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
-
+    private void showHomePage(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         HttpSession session = request.getSession();
         int tableIdParam = Helper.parseIntegerSafe(request.getParameter("table-id"), -1);
 
@@ -59,6 +58,10 @@ public class ClientServlet extends HttpServlet {
         double totalAmount = orderDetails.stream()
                 .mapToDouble(d -> d.getPrice() * d.getQuantity())
                 .sum();
+        Map<Integer, List<MenuProduct>> menuProductMap = productService.selectMenuProductForClient();
+        System.out.println("Menu Product Map size: " + menuProductMap.size()); // Debug log
+
+        request.setAttribute("menuProductMap", menuProductMap);
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
         request.setAttribute("orderDetails", orderDetails);

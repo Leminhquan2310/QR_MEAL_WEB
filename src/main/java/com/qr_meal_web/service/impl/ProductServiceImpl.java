@@ -1,5 +1,6 @@
 package com.qr_meal_web.service.impl;
 
+import com.qr_meal_web.model.MenuProduct;
 import com.qr_meal_web.model.Product;
 import com.qr_meal_web.repository.ProductRepository;
 import com.qr_meal_web.repository.impl.ProductRepositoryImpl;
@@ -8,9 +9,15 @@ import com.qr_meal_web.service.ProductService;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository = new ProductRepositoryImpl();
+
+    @Override
+    public List<Product> selectListProduct() {
+        return productRepository.selectListProduct();
+    }
 
     @Override
     public List<Product> selectAllProduct(int limit, int page) {
@@ -63,6 +70,11 @@ public class ProductServiceImpl implements ProductService {
             params.add(category);
         }
         return productRepository.selectProductForClient(sql.toString(), params);
+    }
+
+    @Override
+    public Map<Integer, List<MenuProduct>> selectMenuProductForClient() {
+        return productRepository.selectMenuProductForClient();
     }
 
     @Override

@@ -1,0 +1,8 @@
+.mult-select-tag .item img {
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.mult-select-tag .item:hover {
+    background-color: #f8f9fa;
+}

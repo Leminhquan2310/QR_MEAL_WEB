@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/libs/bootstrap/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
     <link rel="stylesheet" href="resources/css/client.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 </head>
 <body>
 
@@ -81,6 +83,62 @@
             </c:choose>
         </c:forEach>
     </div>
+
+    <c:forEach var="entry" items="${menuProductMap}">
+        <c:set var="firstItem" value="${entry.value[0]}"/>
+
+        <!-- Header mỗi Menu -->
+        <div class="menu-header text-center mb-3">
+            <h1 class="menu-title">${firstItem.menu.name}</h1>
+            <p class="menu-subtitle">${firstItem.menu.description}</p>
+        </div>
+
+        <!-- Swiper Wrapper cho từng Menu -->
+        <div class="swiper myProductSwiper">
+            <div class="swiper-wrapper">
+                <c:forEach var="mp" items="${entry.value}">
+                    <c:if test="${mp.product.status.code == 1 || mp.product.status.code == 2}">
+                        <div class="swiper-slide">
+                            <div class="card product-card p-2 h-100 ${mp.product.status.code == 2 ? 'out-of-stock' : ''}">
+                                <div class="position-relative">
+                                    <img src="${mp.product.image}" class="card-img-top product-img"
+                                         alt="${mp.product.name}"/>
+
+                                    <c:if test="${mp.product.status.code == 2}">
+                                        <div class="product-overlay">Hết hàng</div>
+                                    </c:if>
+                                </div>
+
+                                <div class="card-body text-center">
+                                    <h6 class="card-title fw-bold">${mp.product.name}</h6>
+                                    <p class="text-danger fw-semibold mb-2">
+                                        <fmt:formatNumber value="${mp.product.price}"/> ₫
+                                    </p>
+                                    <button type="submit"
+                                            data-id="${mp.product.id}"
+                                            data-name="${mp.product.name}"
+                                            data-price="${mp.product.price}"
+                                            class="btn btn-${mp.product.status.code != 1 ? "secondary" : "add"} w-100 btn-add-cart"
+                                        ${mp.product.status.code != 1 ? "disabled" : ""}>
+                                        Thêm vào giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </c:if>
+                </c:forEach>
+            </div>
+
+            <!-- Nút điều hướng -->
+            <div class="btn-swiper-prev">
+                <i class="bi bi-chevron-left"></i>
+            </div>
+            <div class="btn-swiper-next">
+                <i class="bi bi-chevron-right"></i>
+            </div>
+        </div>
+    </c:forEach>
+
 </div>
 
 <%
@@ -256,7 +314,6 @@
         </div>
     </div>
 </div>
-
 
 
 <script src="${pageContext.request.contextPath}/resources/libs/bootstrap/js/bootstrap.bundle.min.js"></script>

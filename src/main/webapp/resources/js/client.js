@@ -98,17 +98,17 @@ function renderCart(cart) {
 function initCartEvents() {
     document.querySelectorAll('.btn-remove').forEach(btn => {
         btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
-    });
 
+    });
     document.querySelectorAll('.btn-decrease').forEach(btn => {
         btn.addEventListener('click', () => updateQuantity(btn.dataset.id, -1));
-    });
 
+    });
     document.querySelectorAll('.btn-increase').forEach(btn => {
         btn.addEventListener('click', () => updateQuantity(btn.dataset.id, 1));
     });
-}
 
+}
 // Thêm sản phẩm vào cart
 document.querySelectorAll('.btn-add-cart').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -161,8 +161,8 @@ document.querySelectorAll('.btn-add-cart').forEach(btn => {
         }, 800);
 
     });
-});
 
+});
 // Xóa sản phẩm
 function removeFromCart(productId) {
     fetch('/cart', {
@@ -172,8 +172,8 @@ function removeFromCart(productId) {
     })
         .then(res => res.json())
         .then(cart => renderCart(cart));
-}
 
+}
 // Cập nhật số lượng
 function updateQuantity(productId, delta) {
     fetch('/cart', {
@@ -186,6 +186,7 @@ function updateQuantity(productId, delta) {
 }
 
 // Khởi tạo event khi load
+
 document.addEventListener('DOMContentLoaded', () => {
     initCartEvents();
     const footer = document.querySelector('#cartModal .modal-footer');
@@ -200,5 +201,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Khi nhấn "Món đã gọi" → ẩn footer
     tabOrdered.addEventListener('shown.bs.tab', function () {
         footer.classList.add('d-none');
+    });
+});
+
+const sliders = document.querySelectorAll('.myProductSwiper');
+
+sliders.forEach(slider => {
+    new Swiper(slider, {
+        slidesPerView: 4,
+        spaceBetween: 15,
+        loop: true,
+        grabCursor: true,
+        navigation: {
+            nextEl: slider.querySelector('.btn-swiper-next'),
+            prevEl: slider.querySelector('.btn-swiper-prev')
+        },
+        breakpoints: {
+            320: { slidesPerView: 1 },
+            576: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            992: { slidesPerView: 4 }
+        }
     });
 });

@@ -1,6 +1,6 @@
 
 body {
-    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     margin-bottom: 50px;
 }
 
@@ -192,6 +192,89 @@ body.modal-open {
 
 .product-card.out-of-stock .product-img {
     filter: grayscale(70%) brightness(0.7);
+}
+
+.menu-header {
+    padding: 40px 20px;
+}
+
+.menu-title {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    font-size: 2.5rem;
+    color: #ffffff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+.menu-subtitle {
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 500;
+    font-size: 1.1rem;
+    color: #ffffff;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+}
+
+.myProductSwiper {
+    padding: 10px 0;
+}
+
+.swiper-slide {
+    height: auto;
+}
+
+.product-card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Nút điều hướng */
+.btn-swiper-next,
+.btn-swiper-prev {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6); /* Nền trắng hơi mờ */
+    backdrop-filter: blur(4px); /* Làm mờ nền phía sau (đẹp hơn) */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+/* Icon Bootstrap */
+.btn-swiper-next i,
+.btn-swiper-prev i {
+    font-size: 20px;
+    color: #333; /* Màu mũi tên */
+}
+
+/* Vị trí */
+.btn-swiper-prev {
+    left: 0;
+}
+
+.btn-swiper-next {
+    right: 0;
+}
+
+/* Hover */
+.btn-swiper-next:hover,
+.btn-swiper-prev:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-50%) scale(1.1);
 }
 
 
