@@ -9,6 +9,8 @@ public interface TableService {
 
     List<Table> selectAllTable(int limit, int page);
 
+    Table selectOne(int id);
+
     List<Table> filtersTable(String createdFrom, String createdTo, int limit, int page);
 
     boolean insertTable(String name);

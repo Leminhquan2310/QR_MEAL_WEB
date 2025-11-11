@@ -51,3 +51,69 @@
         </div>
     </div>
 </div>
+
+<!-- Modal thêm/sửa -->
+<div class="modal fade" id="discountModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="/discount">
+                <div class="modal-header bg-gradient bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fa-solid fa-tags text-danger me-2"></i>Thêm giảm giá
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="discountId">
+                    <input type="hidden" name="action" id="formAction" value="create">
+
+                    <!-- Điểm yêu cầu -->
+                    <div class="mb-3">
+                        <label class="form-label"> Điểm yêu cầu </label>
+                        <input type="number" name="points_required" id="discountPoints" class="form-control" required
+                               min="0">
+                    </div>
+
+                    <!-- Loại giảm giá -->
+                    <div class="mb-3">
+                        <label class="form-label"> Loại đơn vị giảm giá </label>
+                        <select name="discount_type" id="discountType" class="form-select" required>
+                            <c:forEach var="t" items="${types}">
+                                <option value="${t.value}">Giảm theo ${t.label}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+
+                    <!-- Giá trị giảm -->
+                    <div class="mb-3">
+                        <label class="form-label"> Giá trị giảm </label>
+                        <input type="number" name="discount_value" id="discountValue" class="form-control" required
+                               min="0" step="0.01" placeholder="VD: 10 hoặc 50000">
+                        <div class="form-text" id="discountHint">Nhập giá trị theo loại giảm giá đã chọn.</div>
+                    </div>
+
+                    <!-- Mô tả -->
+                    <div class="mb-3">
+                        <label class="form-label"> Mô tả </label>
+                        <textarea name="description" id="discountDescription" class="form-control" rows="3"
+                                  required></textarea>
+                    </div>
+
+                    <div class="mb-3 status-toggle">
+                        <label class="form-label mb-1">Trạng thái</label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="discountStatus" name="status" value="1" checked>
+                            <label class="form-check-label" for="discountStatus" id="statusLabel">Hoạt động</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

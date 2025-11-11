@@ -31,6 +31,40 @@
     box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
 }
 
+/*Hiệu ứng bàn mới có order*/
+.table-updated {
+    border: 3px solid gold !important;
+    animation: glowPulse 4s ease-in-out, borderFlash 1s linear infinite alternate;
+}
+
+@keyframes borderFlash {
+    from { border-color: gold; }
+    to { border-color: orange; }
+}
+
+@keyframes glowPulse {
+    0% {
+        box-shadow: 0 0 10px 2px rgba(255, 255, 0, 0.8);
+        transform: scale(1.05);
+    }
+    25% {
+        box-shadow: 0 0 20px 6px rgba(255, 200, 0, 0.9);
+        transform: scale(1.1);
+    }
+    50% {
+        box-shadow: 0 0 30px 10px rgba(255, 150, 0, 0.8);
+        transform: scale(1.08);
+    }
+    75% {
+        box-shadow: 0 0 25px 8px rgba(255, 200, 0, 0.9);
+        transform: scale(1.1);
+    }
+    100% {
+        box-shadow: none;
+        transform: scale(1);
+    }
+}
+
 /* ========== Màu trạng thái bàn ========== */
 .bg-success {
     background: linear-gradient(135deg, #28a745, #5cd65c); /* xanh */

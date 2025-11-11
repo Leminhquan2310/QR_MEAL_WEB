@@ -14,6 +14,7 @@ import java.util.List;
 public class TableRepositoryImpl implements TableRepository {
     private static final String SELECT_LIST_TABLE = "SELECT * FROM `table` WHERE status <> 0";
     private static final String SELECT_ALL_TABLE = "SELECT * FROM `table` LIMIT ? OFFSET ?";
+    private static final String SELECT_ONE = "SELECT * FROM `table` WHERE id = ?";
     private static final String FILTER_TABLE = "SELECT * FROM `table` WHERE 1=1";
     private static final String INSERT_TABLE = "INSERT INTO `table` (name) values (?)";
     private static final String UPDATE_TABLE = "UPDATE `table` SET qr_code = ?, name = ? WHERE id = ?";
@@ -31,21 +32,7 @@ public class TableRepositoryImpl implements TableRepository {
              PreparedStatement statement = connection.prepareStatement(SELECT_LIST_TABLE)) {
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                Table table = new Table(
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("qr_code"),
-                        rs.getTimestamp("created_at"),
-                        rs.getTimestamp("updated_at"),
-                        TableStatus.fromCode(rs.getInt("status")),
-                        rs.getInt("pos_x"),
-                        rs.getInt("pos_y"),
-                        rs.getInt("width"),
-                        rs.getInt("height"),
-                        rs.getString("shape"),
-                        rs.getString("area")
-                );
-                tables.add(table);
+                tables.add(mapToTable(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -62,19 +49,27 @@ public class TableRepositoryImpl implements TableRepository {
             statement.setInt(2, offset);
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String qr_code = rs.getString("qr_code");
-                Timestamp created_at = rs.getTimestamp("created_at");
-                Timestamp updated_at = rs.getTimestamp("updated_at");
-                int status_code = rs.getInt("status");
-                TableStatus status = TableStatus.fromCode(status_code);
-                tables.add(new Table(id, name, qr_code, created_at, updated_at, status));
+                tables.add(mapToTable(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return tables;
+    }
+
+    @Override
+    public Table selectOne(int id) {
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(SELECT_ONE)) {
+            statement.setInt(1, id);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return mapToTable(rs);
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override
@@ -87,14 +82,7 @@ public class TableRepositoryImpl implements TableRepository {
             }
             ResultSet rs = statement.executeQuery();
             while (rs.next()) {
-                int id = rs.getInt("id");
-                String name = rs.getString("name");
-                String qr_code = rs.getString("qr_code");
-                Timestamp created_at = rs.getTimestamp("created_at");
-                Timestamp updated_at = rs.getTimestamp("updated_at");
-                int status_code = rs.getInt("status");
-                TableStatus status = TableStatus.fromCode(status_code);
-                tables.add(new Table(id, name, qr_code, created_at, updated_at, status));
+                tables.add(mapToTable(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -287,5 +275,22 @@ public class TableRepositoryImpl implements TableRepository {
             System.out.println(e.getMessage());
         }
         return 0;
+    }
+
+    private Table mapToTable(ResultSet rs) throws SQLException {
+        int id = rs.getInt("id");
+        String name = rs.getString("name");
+        String qr_code = rs.getString("qr_code");
+        Timestamp created_at = rs.getTimestamp("created_at");
+        Timestamp updated_at = rs.getTimestamp("updated_at");
+        int status_code = rs.getInt("status");
+        TableStatus status = TableStatus.fromCode(status_code);
+        int pos_x = rs.getInt("pos_x");
+        int pos_y = rs.getInt("pos_y");
+        int width = rs.getInt("width");
+        int height = rs.getInt("height");
+        String shape = rs.getString("shape");
+        String area = rs.getString("area");
+        return new Table(id, name, qr_code, created_at, updated_at, status, pos_x, pos_y, width, height, shape, area);
     }
 }

@@ -1,17 +1,19 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.Gson;
 import com.qr_meal_web.model.*;
 import com.qr_meal_web.service.*;
 import com.qr_meal_web.service.impl.*;
 import com.qr_meal_web.util.Helper;
+import com.qr_meal_web.websocket.NotificationSocket;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @WebServlet(name = "ClientServlet", urlPatterns = "/client")
 public class ClientServlet extends HttpServlet {
@@ -59,8 +61,6 @@ public class ClientServlet extends HttpServlet {
                 .mapToDouble(d -> d.getPrice() * d.getQuantity())
                 .sum();
         Map<Integer, List<MenuProduct>> menuProductMap = productService.selectMenuProductForClient();
-        System.out.println("Menu Product Map size: " + menuProductMap.size()); // Debug log
-
         request.setAttribute("menuProductMap", menuProductMap);
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);

@@ -36,8 +36,12 @@
     <c:remove var="status" scope="session"/>
 </c:if>
 
-<div class="container py-5">
-    <h2 class="text-center mb-4 fw-bold">Sản phẩm nổi bật</h2>
+<div class="container pb-5">
+    <!-- Header mỗi Menu -->
+    <div class="menu-header text-center">
+        <h1 class="menu-title">Nhà hàng ABC</h1>
+        <p class="menu-subtitle">Danh sách các sản phẩm</p>
+    </div>
     <!-- CATEGORY -->
     <div class="category-bar">
         <a href="${pageContext.request.contextPath}/client"
@@ -160,7 +164,7 @@
     <div class="cart-info">
         <i class="bi bi-cart3 fs-4"></i>
         SL: <span class="cart-count">${cart.totalQuantity}</span>
-        | Tổng: <span><fmt:formatNumber value="${cart.totalAmount}"/> ₫</span>
+        | Tổng: <span id="cart-total"><fmt:formatNumber value="${cart.totalAmount}"/> ₫</span>
     </div>
     <a href="#" class="btn-view">Gọi món</a>
 </div>
@@ -308,7 +312,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <form action="${pageContext.request.contextPath}/order" method="POST">
                     <input type="hidden" name="action" value="create">
-                    <button type="submit" class="btn btn-success disabled" id="btn-checkout">Gọi món</button>
+                    <button type="submit" class="btn btn-success disabled" id="btn-checkout" >Gọi món</button>
                 </form>
             </div>
         </div>

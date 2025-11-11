@@ -27,8 +27,14 @@ public class OrderServiceImpl implements OrderService {
             connection = DBConnection.getConnection();
             connection.setAutoCommit(false);
 
-            // 1. Tạo order + order detail
-            int order_id = orderRepository.insertOrder(connection, table_id, cart);
+            int order_id;
+            Table table = tableRepository.selectOne(table_id);
+            if (table.getStatus() == TableStatus.AVAILABLE) {
+                // 1. Tạo order + order detail
+                order_id = orderRepository.insertOrder(connection, table_id, cart);
+            } else {
+                order_id = orderRepository.selectOrderByTableIdAvailable(table_id).getId();
+            }
 
 
             for (CartItem cartItem : cart.getItems()) {
@@ -81,7 +87,39 @@ public class OrderServiceImpl implements OrderService {
     public boolean deleteOrder(int id) {
         boolean isReferenced = orderRepository.isReferenced(id);
         if (isReferenced) return false;
-        return orderRepository.deleteOrder(id);
+
+        Connection connection = DBConnection.getConnection();
+        Order order = orderRepository.selectOrderById(id);
+        try {
+            connection.setAutoCommit(false);
+            // 4. Cập nhật trạng thái bàn
+            TableStatus newTableStatus = TableStatus.fromOrderStatus(OrderStatus.CANCELLED);
+            tableRepository.updateTableStatus(connection, order.getTable_id(), newTableStatus.getCode());
+
+            orderRepository.deleteOrder(connection, id);
+
+            connection.commit();
+            return true;
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+            System.out.println(e.getMessage());
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override

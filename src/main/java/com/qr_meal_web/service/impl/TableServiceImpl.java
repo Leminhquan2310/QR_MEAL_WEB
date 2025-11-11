@@ -1,5 +1,6 @@
 package com.qr_meal_web.service.impl;
 
+import com.qr_meal_web.enums.TableStatus;
 import com.qr_meal_web.model.Table;
 import com.qr_meal_web.repository.TableRepository;
 import com.qr_meal_web.repository.impl.TableRepositoryImpl;
@@ -21,6 +22,11 @@ public class TableServiceImpl implements TableService {
     public List<Table> selectAllTable(int limit, int page) {
         int offset = (page - 1) * limit;
         return tableRepository.selectAllTable(limit, offset);
+    }
+
+    @Override
+    public Table selectOne(int id) {
+        return tableRepository.selectOne(id);
     }
 
     @Override
@@ -55,7 +61,11 @@ public class TableServiceImpl implements TableService {
 
     @Override
     public boolean deleteTable(int id) {
-        return tableRepository.deleteTable(id);
+        Table table = tableRepository.selectOne(id);
+        if (table.getStatus().getCode() != TableStatus.AVAILABLE.getCode()) {
+            return false;
+        }
+        return checkCanDelete(id) ? tableRepository.deleteTable(id) : setInactive(id);
     }
 
     @Override

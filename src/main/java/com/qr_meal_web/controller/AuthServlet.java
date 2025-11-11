@@ -33,7 +33,7 @@ public class AuthServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         Employee resultCheckLogin = employeeService.checkLogin(phone, password);
-
+        System.out.println(resultCheckLogin);
         if (resultCheckLogin != null) {
             HttpSession session = request.getSession();
             session.setAttribute("account", resultCheckLogin);

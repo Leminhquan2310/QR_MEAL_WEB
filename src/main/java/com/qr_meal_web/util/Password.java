@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class Password {
     // Pepper (nếu dùng) — lưu trong file config hoặc environment variable, không commit vào git
-    private static final  String PEPPER = System.getenv("PEPPER");
+    private static final String PEPPER = System.getenv("PEPPER");
 
     // cost/work factor: 10-12 là phổ biến. 12 an toàn hơn nhưng chậm hơn.
     private static final int LOG_ROUNDS = 10;
@@ -38,8 +38,8 @@ public class Password {
     }
 
     public static boolean verifyPassword(String plainPassword, String storedHash) {
-        String toCheck =plainPassword;
-        if (PEPPER != null && !PEPPER.isEmpty()){
+        String toCheck = plainPassword;
+        if (PEPPER != null && !PEPPER.isEmpty()) {
             toCheck = plainPassword + PEPPER;
         }
         return BCrypt.checkpw(toCheck, storedHash);

@@ -1,14 +1,15 @@
 package com.qr_meal_web.controller;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.qr_meal_web.enums.OrderStatus;
 import com.qr_meal_web.model.*;
 import com.qr_meal_web.service.CartService;
-import com.qr_meal_web.service.InvoiceService;
 import com.qr_meal_web.service.OrderDetailService;
 import com.qr_meal_web.service.OrderService;
 import com.qr_meal_web.service.impl.*;
 import com.qr_meal_web.util.Helper;
+import com.qr_meal_web.websocket.NotificationSocket;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,7 +18,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -160,7 +160,7 @@ public class OrderServlet extends HttpServlet {
         request.setAttribute("pageTitle", "Chi tiết đơn hàng");
         request.setAttribute("pageContent", "../order/order_detail.jsp");
         request.setAttribute("pageCss", "/resources/css/order.css");
-        request.setAttribute("pageJs", "/resources/js/order.js");
+        request.setAttribute("pageJs", "/resources/js/order-detail.js");
         request.setAttribute("order", order);
         request.setAttribute("orderDetails", orderDetails);
         request.setAttribute("totalAmount", totalAmount);
@@ -213,6 +213,14 @@ public class OrderServlet extends HttpServlet {
 
         boolean isCreated = orderService.insertOrder(table_id, cart);
         if (isCreated) {
+            Map<String, Object> payload = new HashMap<>();
+            Table table = new TableServiceImpl().selectOne(table_id);
+            payload.put("table_id", table_id);
+            payload.put("message", "Có đơn hàng mới tại " + table.getName());
+            payload.put("timestamp", System.currentTimeMillis());
+
+            String jsonMessage = new Gson().toJson(payload);
+            NotificationSocket.broadcast(jsonMessage);
             session.setAttribute("message", "Gọi món thành công!");
             session.setAttribute("status", "success");
             session.removeAttribute("cart");

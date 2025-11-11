@@ -10,6 +10,8 @@ public interface TableRepository {
 
     List<Table> selectAllTable(int limit, int offset);
 
+    Table selectOne(int id);
+
     List<Table> filtersTable(String filterString, List<Object> params);
 
     boolean insertTable(String name);

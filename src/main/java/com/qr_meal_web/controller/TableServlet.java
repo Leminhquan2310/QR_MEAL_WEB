@@ -159,7 +159,7 @@ public class TableServlet extends HttpServlet {
             session.setAttribute("message", "Thêm mới thất bại!");
             session.setAttribute("status", "error");
         }
-        response.sendRedirect("/table");
+        response.sendRedirect(request.getContextPath() + "/table");
     }
 
     private void handleUpdateTable(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -177,37 +177,21 @@ public class TableServlet extends HttpServlet {
             session.setAttribute("message", "Thêm mới thất bại!");
             session.setAttribute("status", "error");
         }
-        response.sendRedirect("/table");
+        response.sendRedirect(request.getContextPath() + "/table");
     }
 
     private void handleDeleteTable(HttpServletRequest request, HttpServletResponse response) throws IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        boolean canDelete = tableService.checkCanDelete(id);
 
-        String message, status;
         HttpSession session = request.getSession();
-        if (canDelete) {
-            boolean isSuccess = tableService.deleteTable(id);
-            if (isSuccess) {
-                message = "Xóa nhân viên thành công!";
-                status = "success";
-            } else {
-                message = "Xóa nhân viên thất bại!";
-                status = "error";
-            }
+        boolean isSuccess = tableService.deleteTable(id);
+        if (isSuccess) {
+            session.setAttribute("message", "Cập nhật thành công!");
+            session.setAttribute("status", "success");
         } else {
-            boolean isSuccess = tableService.setInactive(id);
-            if (isSuccess) {
-                message = "Tài khoản đã được ngưng việc sử dụng!";
-                status = "success";
-            } else {
-                message = "Ngưng sử dụng tài khoản thất bại!";
-                status = "error";
-            }
+            session.setAttribute("message", "Cập nhật thất bại!");
+            session.setAttribute("status", "error");
         }
-
-        session.setAttribute("message", message);
-        session.setAttribute("status", status);
         response.sendRedirect(request.getContextPath() + "/table");
     }
 

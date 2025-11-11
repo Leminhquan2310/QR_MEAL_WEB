@@ -17,7 +17,7 @@ public interface OrderRepository {
 
     Order selectOrderByTableIdAvailable(int id);
 
-    boolean deleteOrder(int id);
+    boolean deleteOrder(Connection connection, int id);
 
     boolean changOrderStatus(Connection connection, int order_id, OrderStatus status) throws SQLException;
 

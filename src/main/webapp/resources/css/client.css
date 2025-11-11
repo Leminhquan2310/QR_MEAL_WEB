@@ -9,30 +9,46 @@ body.modal-open {
     padding-right: 0 !important;
 }
 
-/* --- CATEGORY BAR --- */
 .category-bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    overflow-x: auto; /* Cho phép trượt ngang */
+    white-space: nowrap; /* Không xuống dòng */
+    gap: 10px; /* Khoảng cách giữa các nút */
+    padding: 10px;
+    scrollbar-width: none; /* Ẩn thanh cuộn trên Firefox */
+    margin-bottom: 20px;
     justify-content: center;
-    margin-bottom: 30px;
+}
+
+.category-bar::-webkit-scrollbar {
+    display: none; /* Ẩn thanh cuộn trên Chrome, Safari */
 }
 
 .category-btn {
+    flex: 0 0 auto; /* Giữ kích thước cố định khi trượt */
+    padding: 8px 16px;
     border-radius: 20px;
-    border: 1px solid #0d6efd;
-    color: #0d6efd;
-    background: #fff;
-    padding: 6px 16px;
-    font-weight: 500;
+    background-color: #f0f0f0;
+    color: #333;
     text-decoration: none;
-    transition: .15s;
-    white-space: nowrap;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+    white-space: nowrap; /* Giữ chữ trên 1 dòng */
 }
 
-.category-btn:hover, .category-btn.active {
-    background: #0d6efd;
-    color: #fff;
+.category-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.category-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.category-bar {
+    -webkit-overflow-scrolling: touch;
 }
 
 /* --- PRODUCT CARD --- */
@@ -46,9 +62,10 @@ body.modal-open {
     box-shadow: 0 4px 15px rgba(0, 0, 0, .15);
 }
 
+
 .product-img {
     height: 150px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 10px;
 }
 

@@ -4,6 +4,7 @@ function renderCart(cart) {
     let container = document.getElementById("cart-container");
     const cartEmpty = document.getElementById("cart-empty");
     const cartCountEls = document.querySelectorAll(".cart-count");
+    const cartTotalEl = document.getElementById("cart-total");
 
     // Nếu chưa có container mà có sản phẩm, tạo mới
     if (!container && cart.items && cart.items.length > 0) {
@@ -30,6 +31,7 @@ function renderCart(cart) {
             modalBody.appendChild(emptyMsg);
         }
         cartCountEls.forEach(el => (el.textContent = 0));
+        cartTotalEl.innerText = 0;
         return;
     } else {
         if (cartEmpty) cartEmpty.classList.add("d-none");
@@ -88,11 +90,11 @@ function renderCart(cart) {
 
     // Cập nhật icon giỏ hàng
     cartCountEls.forEach(el => (el.textContent = cart.totalQuantity));
-
+    console.log(cart)
+    cartTotalEl.innerText = cart.totalAmount.toLocaleString("vi-VN") + '₫';
     // Gắn lại event
     initCartEvents();
 }
-
 
 // Xử lý sự kiện cho các nút trong cart
 function initCartEvents() {
@@ -109,6 +111,7 @@ function initCartEvents() {
     });
 
 }
+
 // Thêm sản phẩm vào cart
 document.querySelectorAll('.btn-add-cart').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -163,6 +166,7 @@ document.querySelectorAll('.btn-add-cart').forEach(btn => {
     });
 
 });
+
 // Xóa sản phẩm
 function removeFromCart(productId) {
     fetch('/cart', {
@@ -174,6 +178,7 @@ function removeFromCart(productId) {
         .then(cart => renderCart(cart));
 
 }
+
 // Cập nhật số lượng
 function updateQuantity(productId, delta) {
     fetch('/cart', {
@@ -186,7 +191,6 @@ function updateQuantity(productId, delta) {
 }
 
 // Khởi tạo event khi load
-
 document.addEventListener('DOMContentLoaded', () => {
     initCartEvents();
     const footer = document.querySelector('#cartModal .modal-footer');
@@ -194,6 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabOrdered = document.getElementById('pills-ordered-tab');
 
     // Khi nhấn "Giỏ hàng" → hiện footer
+
     tabCart.addEventListener('shown.bs.tab', function () {
         footer.classList.remove('d-none');
     });
@@ -224,3 +229,7 @@ sliders.forEach(slider => {
         }
     });
 });
+
+
+let s = new WebSocket("ws://localhost:8080/qr_meal_web/test");
+s.onopen = () => s.send("hi server");

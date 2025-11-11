@@ -68,7 +68,6 @@ public class DashboardServlet extends HttpServlet {
 
     private void showDashboardIndex(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Table> tables = tableService.getListTable();
-
         int freeTables = (int) tables.stream().filter(table -> table.getStatus().getCode() == 1).count();
         int servingTables = (int) tables.stream().filter(table -> table.getStatus().getCode() == 2).count();
         double todayRevenue = invoiceService.getTodayRevenue();

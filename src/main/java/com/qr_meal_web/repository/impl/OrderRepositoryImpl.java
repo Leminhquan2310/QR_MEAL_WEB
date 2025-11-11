@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderRepositoryImpl implements OrderRepository {
-    private Connection connection;
     private static final String SELECT_ALL_ORDER = "SELECT * FROM `order` ORDER BY created_at DESC LIMIT ? OFFSET ?";
     private static final String SELECT_ORDER_BY_ID = "SELECT * FROM `order` WHERE id = ?";
     private static final String SELECT_ORDER_BY_TABLE_ID = "SELECT * FROM `order` WHERE table_id = ? AND status NOT IN (3, 4)";
@@ -108,8 +107,8 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
-    public boolean deleteOrder(int id) {
-        try (Connection connection = DBConnection.getConnection()) {
+    public boolean deleteOrder(Connection connection, int id) {
+        try {
             PreparedStatement statementDetail = connection.prepareStatement(DELETE_ORDER_DETAIL);
             statementDetail.setInt(1, id);
             PreparedStatement statementOrder = connection.prepareStatement(DELETE_ORDER);

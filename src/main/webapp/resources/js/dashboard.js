@@ -7,6 +7,7 @@ const btnConfirmPayment = document.getElementById("btnConfirmPayment");
 const vnPhoneRegex = /^(?:\+84|0)(?:3[2-9]|5[2689]|7[06-9]|8[1-9]|9[0-9])\d{7}$/;
 const redeemContainer = document.getElementById("redeemContainer");
 const optionEarn = document.getElementById("optionEarn");
+const floorPlan = document.querySelector('.floor-plan');
 
 const toggleFormAddCustomer = (e) => {
     e.preventDefault();
@@ -413,6 +414,12 @@ document.addEventListener("DOMContentLoaded", () => {
         path: "resources/animations/loading.json"
     });
 
+    const params = new URLSearchParams(window.location.search);
+    const highlightId = params.get("highlight");
+    if (highlightId) {
+        highlightTable(highlightId); // Gọi hàm hiệu ứng bạn đã viết
+    }
+
     paymentModal.addEventListener("hidden.bs.modal", () => {
         resetInlineForm();
         discountForm.style.display = "none";
@@ -500,3 +507,58 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
+
+// Hàm render lại sơ đồ bàn
+const renderTables = (tables, table_highlight) => {
+    floorPlan.innerHTML = ''; // Xóa sơ đồ cũ
+
+    Object.values(tables).forEach(table => {
+        const div = document.createElement('div');
+        div.className = `
+        table-item position-absolute fw-bold d-flex align-items-center
+        justify-content-center text-white flex-column bg-${table.status.badge}
+      `;
+        div.style = `
+        left:${table.pos_x * 10}px;
+        top:${table.pos_y * 10}px;
+        width:${table.width * 10}px;
+        height:${table.height * 10}px;
+        line-height:${table.height}px;
+        border-radius:10px;
+        cursor:pointer;
+        border:2px solid #fff;
+        transition: all 0.4s ease;
+      `;
+        div.title = `Bàn: ${table.name}\nTrạng thái: ${table.status.label}`;
+        div.dataset.id = table.id;
+        div.dataset.name = table.name;
+        div.dataset.status = table.status.code;
+        div.dataset.bsToggle = "modal";
+        div.dataset.bsTarget = "#tableModal";
+
+        div.innerHTML = `
+        <h4>${table.name}</h4>
+        <p>${table.status.label}</p>
+      `;
+
+        floorPlan.appendChild(div);
+    });
+
+    highlightTable(table_highlight);
+}
+
+// ✅ Hàm highlight bàn vừa thay đổi
+const highlightTable = (tableId) => {
+    const el = document.querySelector(`[data-id="${tableId}"]`);
+    if (!el) return;
+
+    el.classList.add('table-updated');
+    setTimeout(() => {
+        el.classList.remove('table-updated')
+        // xóa param khỏi url
+        const newUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, document.title, newUrl);
+    }, 4000); // 4 giây
+
+
+};
